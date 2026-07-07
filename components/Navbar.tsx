@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { LogOut, LayoutDashboard, Users } from 'lucide-react'
+import { LogOut, LayoutDashboard, Users, UserCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 
@@ -49,6 +49,12 @@ export default function Navbar({
                   <LayoutDashboard size={16} /> Dashboard
                 </Link>
               )}
+              <Link
+                href="/dashboard/profile"
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 hover:text-navy-600 rounded-xl transition"
+              >
+                <UserCircle size={16} /> Profil
+              </Link>
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-500 hover:text-red-600 rounded-xl transition"
