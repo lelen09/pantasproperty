@@ -7,6 +7,7 @@ import AgentBadge from '@/components/AgentBadge'
 import GoogleMapsIcon from '@/components/icons/GoogleMapsIcon'
 import WaContactButton from './WaContactButton'
 import BrosurButton from './BrosurButton'
+import ListingCard from '@/components/ListingCard'
 import {
   MapPin, BedDouble, Bath, Layers, Car, FileCheck, Compass,
   ShieldCheck, Route, TrafficCone, School, Store, User,
@@ -105,6 +106,21 @@ export default async function ListingDetailPage({
       ? listing.google_maps_url
       : `https://${listing.google_maps_url}`
     : null
+
+  // ── Properti serupa: kota sama, atau harga dalam rentang ±30%
+  const priceMin = Math.round(listing.price * 0.7)
+  const priceMax = Math.round(listing.price * 1.3)
+  const { data: similarRaw } = await supabase
+    .from('listings')
+    .select(
+      `*, profiles (id, full_name, phone_whatsapp, avatar_url, agent_badge), listing_media (*)`
+    )
+    .eq('status', 'active')
+    .neq('id', listing.id)
+    .or(`city.eq.${listing.city},and(price.gte.${priceMin},price.lte.${priceMax})`)
+    .limit(4)
+
+  const similarListings = (similarRaw as Listing[] | null) || []
 
   return (
     <>
@@ -250,6 +266,17 @@ export default async function ListingDetailPage({
           <p className="text-xs text-gray-400 mt-4">
             *Estimasi cicilan KPR bersifat kasar, bukan simulasi resmi bank.
           </p>
+
+          {similarListings.length > 0 && (
+            <div className="mt-8">
+              <h2 className="font-semibold text-gray-800 mb-4">🏠 Properti Serupa</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {similarListings.map((l) => (
+                  <ListingCard key={l.id} listing={l} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </>
