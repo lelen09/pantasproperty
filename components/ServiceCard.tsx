@@ -3,12 +3,14 @@
 // Card jasa renovasi untuk halaman publik — dengan tombol WhatsApp agent
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { createPortal } from 'react-dom'
 import { MapPin, MessageCircle, User, X, Hammer, ImageOff, Heart, Share2, Play } from 'lucide-react'
 import type { Service } from '@/lib/types'
 import { isFavoriteService, toggleFavoriteService } from '@/lib/favorites'
 import AgentBadge from '@/components/AgentBadge'
 import { createClient } from '@/lib/supabase/client'
+import { logLead } from '@/lib/logLead'
 import toast from 'react-hot-toast'
 
 function formatRupiah(angka: number) {
@@ -64,10 +66,7 @@ export default function ServiceCard({ service }: { service: Service }) {
   const mainPhoto = after || portfolio || before
 
   const handleWaClick = () => {
-    supabase
-      .from('leads')
-      .insert({ agent_id: service.agent_id, service_id: service.id, source: 'service' })
-      .then(() => {})
+    logLead(supabase, { agentId: service.agent_id, serviceId: service.id, source: 'service' })
   }
 
   const agent = service.profiles
@@ -109,21 +108,27 @@ export default function ServiceCard({ service }: { service: Service }) {
           {before && after ? (
             <div className="grid grid-cols-2 gap-0.5 bg-gray-100">
               <div className="relative aspect-square">
-                <img src={before.url} alt="Sebelum" className="w-full h-full object-cover" />
+                <Image src={before.url} alt="Sebelum" fill sizes="50vw" className="object-cover" />
                 <span className="absolute bottom-1 left-1 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full">
                   Sebelum
                 </span>
               </div>
               <div className="relative aspect-square">
-                <img src={after.url} alt="Sesudah" className="w-full h-full object-cover" />
+                <Image src={after.url} alt="Sesudah" fill sizes="50vw" className="object-cover" />
                 <span className="absolute bottom-1 left-1 bg-navy-600 text-white text-[10px] px-2 py-0.5 rounded-full">
                   Sesudah
                 </span>
               </div>
             </div>
           ) : mainPhoto ? (
-            <div className="aspect-[4/3] bg-gray-100">
-              <img src={mainPhoto.url} alt={service.title} className="w-full h-full object-cover" />
+            <div className="relative aspect-[4/3] bg-gray-100">
+              <Image
+                src={mainPhoto.url}
+                alt={service.title}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className="object-cover"
+              />
             </div>
           ) : (
             <div className="aspect-[4/3] bg-gray-100 flex items-center justify-center text-gray-300">

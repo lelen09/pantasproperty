@@ -2,6 +2,7 @@
 
 import { MessageCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { logLead } from '@/lib/logLead'
 import type { Listing } from '@/lib/types'
 
 export default function WaContactButton({ listing }: { listing: Listing }) {
@@ -14,10 +15,7 @@ export default function WaContactButton({ listing }: { listing: Listing }) {
   const waLink = `https://wa.me/${waNumber}?text=${waMessage}`
 
   const handleClick = () => {
-    supabase
-      .from('leads')
-      .insert({ agent_id: listing.agent_id, listing_id: listing.id, source: 'listing' })
-      .then(() => {})
+    logLead(supabase, { agentId: listing.agent_id, listingId: listing.id, source: 'listing' })
   }
 
   return (

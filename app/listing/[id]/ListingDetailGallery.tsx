@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import Image from 'next/image'
 import { Play, ChevronLeft, ChevronRight, Layers } from 'lucide-react'
 import type { ListingMedia } from '@/lib/types'
 
@@ -42,7 +43,14 @@ export default function ListingDetailGallery({
         ) : (
           <div className="w-full h-full" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
             {activeUrl ? (
-              <img src={activeUrl} alt={title} className="w-full h-full object-cover" />
+              <Image
+                src={activeUrl}
+                alt={title}
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, 800px"
+                className="object-cover"
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-300">
                 <Layers size={64} />

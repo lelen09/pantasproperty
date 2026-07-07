@@ -4,6 +4,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createPortal } from 'react-dom'
 import { MapPin, BedDouble, Bath, Layers, Car, MessageCircle, Play, User, X, Heart, Share2, FileCheck, Compass, ShieldCheck, Route, TrafficCone, School, Store, ChevronLeft, ChevronRight } from 'lucide-react'
 import type { Listing } from '@/lib/types'
@@ -12,6 +13,7 @@ import { estimateKprMonthly, formatRupiahShort } from '@/lib/kpr'
 import GoogleMapsIcon from '@/components/icons/GoogleMapsIcon'
 import AgentBadge from '@/components/AgentBadge'
 import { createClient } from '@/lib/supabase/client'
+import { logLead } from '@/lib/logLead'
 import toast from 'react-hot-toast'
 
 function formatRupiah(angka: number) {
@@ -90,10 +92,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
   }
 
   const handleWaClick = () => {
-    supabase
-      .from('leads')
-      .insert({ agent_id: listing.agent_id, listing_id: listing.id, source: 'listing' })
-      .then(() => {})
+    logLead(supabase, { agentId: listing.agent_id, listingId: listing.id, source: 'listing' })
   }
 
   const agent = listing.profiles
@@ -164,8 +163,13 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             onTouchEnd={handleTouchEnd}
           >
             {activeUrl ? (
-              <img src={activeUrl} alt={listing.title}
-                className="w-full h-full object-cover" />
+              <Image
+                src={activeUrl}
+                alt={listing.title}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className="object-cover"
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-300">
                 <Layers size={48} />
