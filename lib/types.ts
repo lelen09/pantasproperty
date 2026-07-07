@@ -71,7 +71,7 @@ export type Service = {
 export type ServiceMedia = {
   id: string
   service_id: string
-  type: 'before' | 'after' | 'portfolio'
+  type: 'before' | 'after' | 'portfolio' | 'video'
   url: string
   storage_path: string
   sort_order: number

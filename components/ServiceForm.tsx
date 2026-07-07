@@ -6,7 +6,7 @@ import { useState, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
-import { Hammer, MapPin, Upload, X, FileText, Tag } from 'lucide-react'
+import { Hammer, MapPin, Upload, X, FileText, Tag, Video } from 'lucide-react'
 
 const CATEGORIES = [
   'Renovasi Total',
@@ -30,7 +30,7 @@ type FormData = {
 type MediaPreview = {
   file: File
   url: string
-  type: 'before' | 'after' | 'portfolio'
+  type: 'before' | 'after' | 'portfolio' | 'video'
 }
 
 export default function ServiceForm({
@@ -50,6 +50,7 @@ export default function ServiceForm({
   const beforeInputRef = useRef<HTMLInputElement>(null)
   const afterInputRef = useRef<HTMLInputElement>(null)
   const portfolioInputRef = useRef<HTMLInputElement>(null)
+  const videoInputRef = useRef<HTMLInputElement>(null)
 
   const handleAddPhoto = (type: 'before' | 'after' | 'portfolio') => (
     e: React.ChangeEvent<HTMLInputElement>
@@ -64,6 +65,26 @@ export default function ServiceForm({
     e.target.value = ''
   }
 
+  // ── Upload video (max ~150MB untuk 2 menit)
+  const handleVideo = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+
+    if (file.size > 150 * 1024 * 1024) {
+      toast.error('Video maksimal 150MB (~2 menit)')
+      return
+    }
+
+    const existingVideo = mediaFiles.find((m) => m.type === 'video')
+    if (existingVideo) {
+      toast.error('Hanya 1 video per jasa')
+      return
+    }
+
+    setMediaFiles((prev) => [...prev, { file, url: URL.createObjectURL(file), type: 'video' }])
+  }
+
   const removeMedia = (index: number) => {
     setMediaFiles((prev) => prev.filter((_, i) => i !== index))
   }
@@ -74,14 +95,15 @@ export default function ServiceForm({
     for (let i = 0; i < mediaFiles.length; i++) {
       const media = mediaFiles[i]
       const ext = media.file.name.split('.').pop()
+      const bucket = media.type === 'video' ? 'service-videos' : 'service-photos'
       const path = `${userId}/${serviceId}/${Date.now()}-${i}.${ext}`
 
-      const { error } = await supabase.storage.from('service-photos').upload(path, media.file)
+      const { error } = await supabase.storage.from(bucket).upload(path, media.file)
       if (error) throw error
 
       const {
         data: { publicUrl },
-      } = supabase.storage.from('service-photos').getPublicUrl(path)
+      } = supabase.storage.from(bucket).getPublicUrl(path)
 
       uploaded.push({
         service_id: serviceId,
@@ -152,11 +174,12 @@ export default function ServiceForm({
     }
   }
 
-  const mediaLabel = { before: 'Sebelum', after: 'Sesudah', portfolio: 'Portofolio' }
+  const mediaLabel = { before: 'Sebelum', after: 'Sesudah', portfolio: 'Portofolio', video: 'Video' }
   const mediaColor = {
     before: 'bg-gray-500',
     after: 'bg-navy-500',
     portfolio: 'bg-gold-500',
+    video: 'bg-purple-500',
   }
 
   return (
@@ -271,6 +294,13 @@ export default function ServiceForm({
           >
             <Upload size={16} /> Foto Portofolio Lain
           </button>
+          <button
+            type="button"
+            onClick={() => videoInputRef.current?.click()}
+            className="flex items-center gap-2 px-4 py-2.5 bg-purple-50 text-purple-700 rounded-xl border border-purple-200 hover:bg-purple-100 transition text-sm font-medium"
+          >
+            <Video size={16} /> Upload Video (~2 menit)
+          </button>
         </div>
 
         <input
@@ -297,10 +327,17 @@ export default function ServiceForm({
           onChange={handleAddPhoto('portfolio')}
           className="hidden"
         />
+        <input
+          ref={videoInputRef}
+          type="file"
+          accept="video/*"
+          onChange={handleVideo}
+          className="hidden"
+        />
 
         <p className="text-xs text-gray-400 mb-4">
           Foto "Sebelum" & "Sesudah" akan ditampilkan berdampingan di halaman publik. Foto: JPG/PNG
-          maks 10MB per file.
+          maks 10MB per file · Video: MP4 maks 150MB (~2 menit).
         </p>
 
         {mediaFiles.length > 0 && (
@@ -310,7 +347,11 @@ export default function ServiceForm({
                 key={i}
                 className="relative group rounded-xl overflow-hidden aspect-square bg-gray-100"
               >
-                <img src={media.url} alt="" className="w-full h-full object-cover" />
+                {media.type === 'video' ? (
+                  <video src={media.url} className="w-full h-full object-cover" />
+                ) : (
+                  <img src={media.url} alt="" className="w-full h-full object-cover" />
+                )}
                 <span
                   className={`absolute top-1 left-1 text-white text-xs px-2 py-0.5 rounded-full ${mediaColor[media.type]}`}
                 >

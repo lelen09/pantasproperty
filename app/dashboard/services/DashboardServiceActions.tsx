@@ -44,12 +44,18 @@ export default function DashboardServiceActions({
     try {
       const { data: mediaList } = await supabase
         .from('service_media')
-        .select('storage_path')
+        .select('storage_path, type')
         .eq('service_id', serviceId)
 
       if (mediaList && mediaList.length > 0) {
-        const paths = mediaList.map((m) => m.storage_path)
-        await supabase.storage.from('service-photos').remove(paths)
+        const photoPaths = mediaList.filter((m) => m.type !== 'video').map((m) => m.storage_path)
+        const videoPaths = mediaList.filter((m) => m.type === 'video').map((m) => m.storage_path)
+        if (photoPaths.length > 0) {
+          await supabase.storage.from('service-photos').remove(photoPaths)
+        }
+        if (videoPaths.length > 0) {
+          await supabase.storage.from('service-videos').remove(videoPaths)
+        }
       }
 
       const { error } = await supabase.from('services').delete().eq('id', serviceId)

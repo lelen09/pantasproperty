@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { MapPin, MessageCircle, User, X, Hammer, ImageOff, Heart, Share2 } from 'lucide-react'
+import { MapPin, MessageCircle, User, X, Hammer, ImageOff, Heart, Share2, Play } from 'lucide-react'
 import type { Service } from '@/lib/types'
 import { isFavoriteService, toggleFavoriteService } from '@/lib/favorites'
 import toast from 'react-hot-toast'
@@ -17,6 +17,7 @@ function formatRupiah(angka: number) {
 
 export default function ServiceCard({ service }: { service: Service }) {
   const [showAgentModal, setShowAgentModal] = useState(false)
+  const [showVideo, setShowVideo] = useState(false)
   const [isFav, setIsFav] = useState(false)
   const [mounted, setMounted] = useState(false)
 
@@ -56,6 +57,7 @@ export default function ServiceCard({ service }: { service: Service }) {
   const before = service.service_media?.find((m) => m.type === 'before')
   const after = service.service_media?.find((m) => m.type === 'after')
   const portfolio = service.service_media?.find((m) => m.type === 'portfolio')
+  const video = service.service_media?.find((m) => m.type === 'video')
   const mainPhoto = after || portfolio || before
 
   const agent = service.profiles
@@ -87,29 +89,47 @@ export default function ServiceCard({ service }: { service: Service }) {
         </button>
       </div>
 
-      {/* ── FOTO */}
-      {before && after ? (
-        <div className="grid grid-cols-2 gap-0.5 bg-gray-100">
-          <div className="relative aspect-square">
-            <img src={before.url} alt="Sebelum" className="w-full h-full object-cover" />
-            <span className="absolute bottom-1 left-1 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full">
-              Sebelum
-            </span>
-          </div>
-          <div className="relative aspect-square">
-            <img src={after.url} alt="Sesudah" className="w-full h-full object-cover" />
-            <span className="absolute bottom-1 left-1 bg-navy-600 text-white text-[10px] px-2 py-0.5 rounded-full">
-              Sesudah
-            </span>
-          </div>
-        </div>
-      ) : mainPhoto ? (
-        <div className="aspect-[4/3] bg-gray-100">
-          <img src={mainPhoto.url} alt={service.title} className="w-full h-full object-cover" />
+      {/* ── FOTO / VIDEO */}
+      {showVideo && video ? (
+        <div className="relative aspect-[4/3] bg-gray-100">
+          <video src={video.url} controls autoPlay className="w-full h-full object-cover" />
         </div>
       ) : (
-        <div className="aspect-[4/3] bg-gray-100 flex items-center justify-center text-gray-300">
-          <ImageOff size={48} />
+        <div className="relative">
+          {before && after ? (
+            <div className="grid grid-cols-2 gap-0.5 bg-gray-100">
+              <div className="relative aspect-square">
+                <img src={before.url} alt="Sebelum" className="w-full h-full object-cover" />
+                <span className="absolute bottom-1 left-1 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full">
+                  Sebelum
+                </span>
+              </div>
+              <div className="relative aspect-square">
+                <img src={after.url} alt="Sesudah" className="w-full h-full object-cover" />
+                <span className="absolute bottom-1 left-1 bg-navy-600 text-white text-[10px] px-2 py-0.5 rounded-full">
+                  Sesudah
+                </span>
+              </div>
+            </div>
+          ) : mainPhoto ? (
+            <div className="aspect-[4/3] bg-gray-100">
+              <img src={mainPhoto.url} alt={service.title} className="w-full h-full object-cover" />
+            </div>
+          ) : (
+            <div className="aspect-[4/3] bg-gray-100 flex items-center justify-center text-gray-300">
+              <ImageOff size={48} />
+            </div>
+          )}
+
+          {/* Tombol play video */}
+          {video && (
+            <button
+              onClick={() => setShowVideo(true)}
+              className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 hover:bg-black/90 transition"
+            >
+              <Play size={12} fill="white" /> Video
+            </button>
+          )}
         </div>
       )}
 
