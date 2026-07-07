@@ -87,6 +87,31 @@ export type Plan = {
   sort_order: number
 }
 
+export type Banner = {
+  id: string
+  advertiser_name: string
+  image_url: string
+  storage_path: string
+  link_url: string | null
+  position: 'home' | 'renovasi'
+  price: number
+  start_date: string
+  end_date: string
+  is_active: boolean
+  created_at: string
+}
+
+export type Lead = {
+  id: string
+  agent_id: string
+  listing_id: string | null
+  service_id: string | null
+  source: 'listing' | 'service'
+  created_at: string
+  listings?: { title: string } | null
+  services?: { title: string } | null
+}
+
 export type Service = {
   id: string
   agent_id: string

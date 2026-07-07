@@ -1,8 +1,9 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import PropertyBrowser from '@/components/PropertyBrowser'
+import BannerCarousel from '@/components/BannerCarousel'
 import Navbar from '@/components/Navbar'
 import Link from 'next/link'
-import type { Listing } from '@/lib/types'
+import type { Listing, Banner } from '@/lib/types'
 
 export default async function HomePage() {
   const supabase = await createServerSupabaseClient()
@@ -31,6 +32,14 @@ export default async function HomePage() {
     .eq('status', 'active')
     .order('created_at', { ascending: false })
 
+  const { data: banners } = await supabase
+    .from('banners')
+    .select('*')
+    .eq('position', 'home')
+    .eq('is_active', true)
+    .lte('start_date', new Date().toISOString())
+    .gte('end_date', new Date().toISOString())
+
   return (
     <>
       <Navbar isLoggedIn={!!user} isAdmin={isAdmin} />
@@ -51,6 +60,8 @@ export default async function HomePage() {
               🔨 Jasa Renovasi
             </Link>
           </div>
+
+          <BannerCarousel banners={(banners as Banner[]) || []} />
 
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
             🏠 Properti Pilihan

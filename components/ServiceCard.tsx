@@ -8,6 +8,7 @@ import { MapPin, MessageCircle, User, X, Hammer, ImageOff, Heart, Share2, Play }
 import type { Service } from '@/lib/types'
 import { isFavoriteService, toggleFavoriteService } from '@/lib/favorites'
 import AgentBadge from '@/components/AgentBadge'
+import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 
 function formatRupiah(angka: number) {
@@ -17,6 +18,7 @@ function formatRupiah(angka: number) {
 }
 
 export default function ServiceCard({ service }: { service: Service }) {
+  const supabase = createClient()
   const [showAgentModal, setShowAgentModal] = useState(false)
   const [showVideo, setShowVideo] = useState(false)
   const [isFav, setIsFav] = useState(false)
@@ -60,6 +62,13 @@ export default function ServiceCard({ service }: { service: Service }) {
   const portfolio = service.service_media?.find((m) => m.type === 'portfolio')
   const video = service.service_media?.find((m) => m.type === 'video')
   const mainPhoto = after || portfolio || before
+
+  const handleWaClick = () => {
+    supabase
+      .from('leads')
+      .insert({ agent_id: service.agent_id, service_id: service.id, source: 'service' })
+      .then(() => {})
+  }
 
   const agent = service.profiles
   const waNumber = agent?.phone_whatsapp?.replace(/\D/g, '')
@@ -232,6 +241,7 @@ export default function ServiceCard({ service }: { service: Service }) {
                 href={waLink}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={handleWaClick}
                 className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-3 rounded-xl transition shadow-sm shadow-green-200"
               >
                 <MessageCircle size={18} />

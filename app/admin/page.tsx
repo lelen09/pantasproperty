@@ -1,9 +1,10 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import type { Profile, Plan, UpgradeRequest } from '@/lib/types'
+import type { Profile, Plan, UpgradeRequest, Banner } from '@/lib/types'
 import AgentRoleToggle from './agents/AgentRoleToggle'
 import AgentPlanEditor from './agents/AgentPlanEditor'
 import PlanPricingEditor from './PlanPricingEditor'
 import UpgradeRequestsPanel from './UpgradeRequestsPanel'
+import BannerManager from './BannerManager'
 
 export default async function AdminPage() {
   const supabase = await createServerSupabaseClient()
@@ -23,6 +24,11 @@ export default async function AdminPage() {
     .select('*, profiles(full_name)')
     .order('created_at', { ascending: false })
 
+  const { data: banners } = await supabase
+    .from('banners')
+    .select('*')
+    .order('created_at', { ascending: false })
+
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-800 mb-2">Kelola Agent</h1>
@@ -33,6 +39,8 @@ export default async function AdminPage() {
       )}
 
       {plans && plans.length > 0 && <PlanPricingEditor plans={plans as Plan[]} />}
+
+      <BannerManager banners={(banners as Banner[]) || []} />
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm divide-y divide-gray-100">
         {(profiles as Profile[] | null)?.map((profile) => (

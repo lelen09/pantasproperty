@@ -1,8 +1,9 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import ServiceBrowser from '@/components/ServiceBrowser'
+import BannerCarousel from '@/components/BannerCarousel'
 import Navbar from '@/components/Navbar'
 import Link from 'next/link'
-import type { Service } from '@/lib/types'
+import type { Service, Banner } from '@/lib/types'
 
 export default async function RenovasiPage() {
   const supabase = await createServerSupabaseClient()
@@ -33,6 +34,14 @@ export default async function RenovasiPage() {
     .eq('status', 'active')
     .order('created_at', { ascending: false })
 
+  const { data: banners } = await supabase
+    .from('banners')
+    .select('*')
+    .eq('position', 'renovasi')
+    .eq('is_active', true)
+    .lte('start_date', new Date().toISOString())
+    .gte('end_date', new Date().toISOString())
+
   return (
     <>
       <Navbar isLoggedIn={!!user} isAdmin={isAdmin} />
@@ -53,6 +62,8 @@ export default async function RenovasiPage() {
               🔨 Jasa Renovasi
             </Link>
           </div>
+
+          <BannerCarousel banners={(banners as Banner[]) || []} />
 
           <h1 className="text-3xl font-bold text-gray-800 mb-2">🔨 Jasa Renovasi</h1>
 

@@ -10,6 +10,7 @@ import { isFavoriteListing, toggleFavoriteListing } from '@/lib/favorites'
 import { estimateKprMonthly, formatRupiahShort } from '@/lib/kpr'
 import GoogleMapsIcon from '@/components/icons/GoogleMapsIcon'
 import AgentBadge from '@/components/AgentBadge'
+import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 
 function formatRupiah(angka: number) {
@@ -19,6 +20,7 @@ function formatRupiah(angka: number) {
 }
 
 export default function ListingCard({ listing }: { listing: Listing }) {
+  const supabase = createClient()
   const [showVideo, setShowVideo] = useState(false)
   const [showAgentModal, setShowAgentModal] = useState(false)
   const [isFav, setIsFav] = useState(false)
@@ -84,6 +86,13 @@ export default function ListingCard({ listing }: { listing: Listing }) {
       goToPhoto(photoIndex + (deltaX < 0 ? 1 : -1))
     }
     touchStartX.current = null
+  }
+
+  const handleWaClick = () => {
+    supabase
+      .from('leads')
+      .insert({ agent_id: listing.agent_id, listing_id: listing.id, source: 'listing' })
+      .then(() => {})
   }
 
   const agent = listing.profiles
@@ -400,6 +409,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
                 href={waLink}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={handleWaClick}
                 className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-3 rounded-xl transition shadow-sm shadow-green-200"
               >
                 <MessageCircle size={18} />

@@ -24,8 +24,8 @@ export default async function DashboardServicesPage() {
 
   return (
     <div>
-      {/* Tab Listing Saya / Layanan Saya */}
-      <div className="flex gap-2 mb-6">
+      {/* Tab Listing Saya / Layanan Saya / Leads Masuk */}
+      <div className="flex gap-2 mb-6 flex-wrap">
         <Link
           href="/dashboard"
           className="px-4 py-2 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-100 transition"
@@ -37,6 +37,12 @@ export default async function DashboardServicesPage() {
           className="px-4 py-2 rounded-xl text-sm font-medium bg-navy-600 text-white"
         >
           🔨 Layanan Saya
+        </Link>
+        <Link
+          href="/dashboard/leads"
+          className="px-4 py-2 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-100 transition"
+        >
+          📩 Leads Masuk
         </Link>
       </div>
 
