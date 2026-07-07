@@ -2,9 +2,9 @@
 // components/ListingCard.tsx
 // Card rumah untuk halaman publik — dengan tombol WhatsApp agent
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { MapPin, BedDouble, Bath, Layers, Car, MessageCircle, Play, User, X, Heart, Share2, FileCheck, Compass, ShieldCheck, Route, TrafficCone, School, Store } from 'lucide-react'
+import { MapPin, BedDouble, Bath, Layers, Car, MessageCircle, Play, User, X, Heart, Share2, FileCheck, Compass, ShieldCheck, Route, TrafficCone, School, Store, ChevronLeft, ChevronRight } from 'lucide-react'
 import type { Listing } from '@/lib/types'
 import { isFavoriteListing, toggleFavoriteListing } from '@/lib/favorites'
 import { estimateKprMonthly, formatRupiahShort } from '@/lib/kpr'
@@ -23,6 +23,8 @@ export default function ListingCard({ listing }: { listing: Listing }) {
   const [showAgentModal, setShowAgentModal] = useState(false)
   const [isFav, setIsFav] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [photoIndex, setPhotoIndex] = useState(0)
+  const touchStartX = useRef<number | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -59,8 +61,30 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 
   const coverPhoto = listing.listing_media?.find(m => m.is_cover && m.type === 'photo')
   const video = listing.listing_media?.find(m => m.type === 'video')
-  const photos = listing.listing_media?.filter(m => m.type === 'photo') || []
-  const coverUrl = coverPhoto?.url || photos[0]?.url
+  const rawPhotos = listing.listing_media?.filter(m => m.type === 'photo') || []
+  // Urutkan supaya foto cover selalu tampil pertama di galeri
+  const photos = coverPhoto
+    ? [coverPhoto, ...rawPhotos.filter(p => p.id !== coverPhoto.id)]
+    : rawPhotos
+  const activeUrl = photos[photoIndex]?.url
+
+  const goToPhoto = (index: number) => {
+    if (photos.length === 0) return
+    const wrapped = (index + photos.length) % photos.length
+    setPhotoIndex(wrapped)
+  }
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+  }
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current
+    if (Math.abs(deltaX) > 40) {
+      goToPhoto(photoIndex + (deltaX < 0 ? 1 : -1))
+    }
+    touchStartX.current = null
+  }
 
   const agent = listing.profiles
   const waNumber = agent?.phone_whatsapp?.replace(/\D/g, '') // hapus karakter non-angka
@@ -124,9 +148,13 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <>
-            {coverUrl ? (
-              <img src={coverUrl} alt={listing.title}
+          <div
+            className="w-full h-full"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            {activeUrl ? (
+              <img src={activeUrl} alt={listing.title}
                 className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-300">
@@ -134,10 +162,42 @@ export default function ListingCard({ listing }: { listing: Listing }) {
               </div>
             )}
 
+            {/* Panah navigasi galeri */}
+            {photos.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => goToPhoto(photoIndex - 1)}
+                  className="absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => goToPhoto(photoIndex + 1)}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition"
+                >
+                  <ChevronRight size={16} />
+                </button>
+
+                {/* Dot indikator */}
+                <div className="absolute bottom-2 inset-x-0 flex justify-center gap-1">
+                  {photos.map((_, i) => (
+                    <span
+                      key={i}
+                      className={`w-1.5 h-1.5 rounded-full transition ${
+                        i === photoIndex ? 'bg-white' : 'bg-white/40'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+
             {/* Badge jumlah foto */}
             {photos.length > 1 && (
               <span className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
-                📷 {photos.length} foto
+                📷 {photoIndex + 1}/{photos.length}
               </span>
             )}
 
@@ -149,7 +209,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
                 <Play size={12} fill="white" /> Video
               </button>
             )}
-          </>
+          </div>
         )}
 
         {/* Status badge */}

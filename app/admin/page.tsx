@@ -1,7 +1,8 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import type { Profile } from '@/lib/types'
+import type { Profile, Plan } from '@/lib/types'
 import AgentRoleToggle from './agents/AgentRoleToggle'
 import AgentPlanEditor from './agents/AgentPlanEditor'
+import PlanPricingEditor from './PlanPricingEditor'
 
 export default async function AdminPage() {
   const supabase = await createServerSupabaseClient()
@@ -11,10 +12,17 @@ export default async function AdminPage() {
     .select('*')
     .order('created_at', { ascending: false })
 
+  const { data: plans } = await supabase
+    .from('plans')
+    .select('*')
+    .order('sort_order', { ascending: true })
+
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-800 mb-2">Kelola Agent</h1>
       <p className="text-gray-500 text-sm mb-6">{profiles?.length || 0} agent terdaftar</p>
+
+      {plans && plans.length > 0 && <PlanPricingEditor plans={plans as Plan[]} />}
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm divide-y divide-gray-100">
         {(profiles as Profile[] | null)?.map((profile) => (

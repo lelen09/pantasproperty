@@ -24,7 +24,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('max_listings')
+    .select('max_listings, full_name')
     .eq('id', user!.id)
     .single()
 
@@ -59,12 +59,12 @@ export default async function DashboardPage() {
           </p>
         </div>
         {limitReached ? (
-          <div
-            className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-400 rounded-xl font-semibold cursor-not-allowed"
-            title="Kuota listing habis, hubungi admin untuk upgrade paket"
+          <Link
+            href="/dashboard/upgrade"
+            className="flex items-center gap-2 px-4 py-2.5 bg-gold-500 hover:bg-gold-600 text-white rounded-xl font-semibold transition shadow-sm"
           >
-            <Lock size={16} /> Kuota Penuh
-          </div>
+            <Lock size={16} /> Upgrade Paket
+          </Link>
         ) : (
           <Link
             href="/dashboard/listing/new"
@@ -74,6 +74,12 @@ export default async function DashboardPage() {
           </Link>
         )}
       </div>
+
+      {limitReached && (
+        <p className="text-xs text-gray-400 -mt-4 mb-6">
+          Kuota listing kamu sudah penuh. Tap "Upgrade Paket" untuk lihat pilihan paket.
+        </p>
+      )}
 
       {listings && listings.length > 0 ? (
         <div className="space-y-3">

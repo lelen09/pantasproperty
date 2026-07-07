@@ -639,6 +639,15 @@ export default function ListingForm({
           Tap foto untuk set sebagai cover
         </p>
 
+        {!isUnlimitedPhotos && currentPhotoCount >= maxPhotos && (
+          <a
+            href="/dashboard/upgrade"
+            className="flex items-center justify-center gap-2 mb-4 py-2.5 bg-gold-50 text-gold-700 border border-gold-200 rounded-xl text-sm font-medium hover:bg-gold-100 transition"
+          >
+            ⭐ Kuota foto habis — Lihat Pilihan Paket
+          </a>
+        )}
+
         {/* Preview Grid */}
         {mediaFiles.length > 0 && (
           <div className="grid grid-cols-3 gap-3">

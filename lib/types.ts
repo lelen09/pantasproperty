@@ -58,6 +58,17 @@ export type ListingMedia = {
   created_at: string
 }
 
+export type Plan = {
+  id: 'free' | 'silver' | 'gold' | 'platinum'
+  name: string
+  price: number
+  max_listings: number
+  max_photos_per_listing: number
+  max_video_seconds: number
+  features: string | null
+  sort_order: number
+}
+
 export type Service = {
   id: string
   agent_id: string
