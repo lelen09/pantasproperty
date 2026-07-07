@@ -21,6 +21,50 @@ const BADGE_LABEL: Record<string, string> = {
   super_agent: '🏆 Super Agent',
 }
 
+// -1 = unlimited (dipakai untuk paket Platinum)
+const UNLIMITED = -1
+
+function LimitField({
+  label,
+  value,
+  onChange,
+  suffix,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  suffix?: string
+}) {
+  const isUnlimited = value === String(UNLIMITED)
+
+  return (
+    <div>
+      <label className="text-xs font-medium text-gray-600">{label}</label>
+      <div className="mt-1 flex items-center gap-2">
+        <input
+          type="number"
+          min="0"
+          disabled={isUnlimited}
+          value={isUnlimited ? '' : value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={isUnlimited ? '∞' : undefined}
+          className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm outline-none disabled:bg-gray-100 disabled:text-gray-400"
+        />
+        {suffix && !isUnlimited && <span className="text-xs text-gray-400 shrink-0">{suffix}</span>}
+      </div>
+      <label className="flex items-center gap-1.5 mt-1 text-xs text-gray-500">
+        <input
+          type="checkbox"
+          checked={isUnlimited}
+          onChange={(e) => onChange(e.target.checked ? String(UNLIMITED) : '0')}
+          className="w-3.5 h-3.5 rounded border-gray-300 text-navy-600 focus:ring-navy-500"
+        />
+        ♾️ Unlimited
+      </label>
+    </div>
+  )
+}
+
 export default function AgentPlanEditor({ profile }: { profile: Profile }) {
   const supabase = createClient()
   const router = useRouter()
@@ -30,6 +74,7 @@ export default function AgentPlanEditor({ profile }: { profile: Profile }) {
   const [badge, setBadge] = useState(profile.agent_badge)
   const [maxListings, setMaxListings] = useState(String(profile.max_listings))
   const [maxPhotos, setMaxPhotos] = useState(String(profile.max_photos_per_listing))
+  const [maxVideoSeconds, setMaxVideoSeconds] = useState(String(profile.max_video_seconds))
 
   const handleSave = async () => {
     setSaving(true)
@@ -38,8 +83,9 @@ export default function AgentPlanEditor({ profile }: { profile: Profile }) {
       .update({
         plan,
         agent_badge: badge,
-        max_listings: parseInt(maxListings) || 0,
-        max_photos_per_listing: parseInt(maxPhotos) || 0,
+        max_listings: parseInt(maxListings),
+        max_photos_per_listing: parseInt(maxPhotos),
+        max_video_seconds: parseInt(maxVideoSeconds),
       })
       .eq('id', profile.id)
 
@@ -98,27 +144,28 @@ export default function AgentPlanEditor({ profile }: { profile: Profile }) {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-medium text-gray-600">Maks. Listing</label>
-              <input
-                type="number"
-                min="0"
-                value={maxListings}
-                onChange={(e) => setMaxListings(e.target.value)}
-                className="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 text-sm outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-gray-600">Maks. Foto/Listing</label>
-              <input
-                type="number"
-                min="0"
-                value={maxPhotos}
-                onChange={(e) => setMaxPhotos(e.target.value)}
-                className="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 text-sm outline-none"
-              />
-            </div>
+            <LimitField label="Maks. Listing" value={maxListings} onChange={setMaxListings} />
+            <LimitField label="Maks. Foto/Listing" value={maxPhotos} onChange={setMaxPhotos} />
           </div>
+
+          <LimitField
+            label="Maks. Durasi Video"
+            value={maxVideoSeconds}
+            onChange={setMaxVideoSeconds}
+            suffix="detik"
+          />
+
+          <button
+            type="button"
+            onClick={() => {
+              setMaxListings(String(UNLIMITED))
+              setMaxPhotos(String(UNLIMITED))
+              setMaxVideoSeconds(String(UNLIMITED))
+            }}
+            className="text-xs text-navy-600 font-medium hover:underline"
+          >
+            ♾️ Set semua jadi Unlimited (Platinum)
+          </button>
 
           <button
             onClick={handleSave}

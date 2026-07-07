@@ -30,7 +30,8 @@ export default async function DashboardPage() {
 
   const totalListings = listings?.length || 0
   const maxListings = profile?.max_listings ?? 5
-  const limitReached = totalListings >= maxListings
+  const isUnlimitedListings = maxListings === -1
+  const limitReached = !isUnlimitedListings && totalListings >= maxListings
 
   return (
     <div>
@@ -54,7 +55,7 @@ export default async function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Listing Saya</h1>
           <p className="text-gray-500 text-sm">
-            {totalListings} dari {maxListings} listing terpakai
+            {isUnlimitedListings ? `${totalListings} listing (Unlimited)` : `${totalListings} dari ${maxListings} listing terpakai`}
           </p>
         </div>
         {limitReached ? (

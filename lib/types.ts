@@ -8,6 +8,7 @@ export type Profile = {
   agent_badge: 'none' | 'verified' | 'top_agent' | 'super_agent'
   max_listings: number
   max_photos_per_listing: number
+  max_video_seconds: number
   created_at: string
 }
 

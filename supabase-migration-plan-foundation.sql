@@ -12,6 +12,9 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS agent_badge TEXT NOT NULL DEFAULT 
 
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS max_listings INTEGER NOT NULL DEFAULT 5;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS max_photos_per_listing INTEGER NOT NULL DEFAULT 10;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS max_video_seconds INTEGER NOT NULL DEFAULT 30;
+-- Catatan: nilai -1 pada max_listings/max_photos_per_listing/max_video_seconds
+-- berarti UNLIMITED (tanpa batas), dipakai untuk paket Platinum.
 
 -- LISTINGS: boost (agent/listing dipin ke atas sampai tanggal tertentu)
 ALTER TABLE listings ADD COLUMN IF NOT EXISTS boosted_until TIMESTAMPTZ;
@@ -27,6 +30,9 @@ DECLARE
   limit_count INTEGER;
 BEGIN
   SELECT max_listings INTO limit_count FROM public.profiles WHERE id = NEW.agent_id;
+  IF limit_count = -1 THEN
+    RETURN NEW; -- unlimited (paket Platinum)
+  END IF;
   SELECT COUNT(*) INTO current_count FROM public.listings WHERE agent_id = NEW.agent_id;
   IF current_count >= limit_count THEN
     RAISE EXCEPTION 'Kuota listing sudah penuh (maksimal % listing untuk paket Anda)', limit_count;

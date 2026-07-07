@@ -58,6 +58,7 @@ export default function ListingForm({
   const [mediaFiles, setMediaFiles] = useState<MediaPreview[]>([])
   const [uploading, setUploading] = useState(false)
   const [maxPhotos, setMaxPhotos] = useState(10)
+  const [maxVideoSeconds, setMaxVideoSeconds] = useState(30)
   const photoInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const videoInputRef = useRef<HTMLInputElement>(null)
@@ -70,19 +71,32 @@ export default function ListingForm({
       if (!user) return
       const { data: profile } = await supabase
         .from('profiles')
-        .select('max_photos_per_listing')
+        .select('max_photos_per_listing, max_video_seconds')
         .eq('id', user.id)
         .single()
-      if (profile?.max_photos_per_listing) setMaxPhotos(profile.max_photos_per_listing)
+      if (profile?.max_photos_per_listing !== undefined) setMaxPhotos(profile.max_photos_per_listing)
+      if (profile?.max_video_seconds !== undefined) setMaxVideoSeconds(profile.max_video_seconds)
     }
     fetchLimit()
   }, [supabase])
 
+  const isUnlimitedPhotos = maxPhotos === -1
   const currentPhotoCount = mediaFiles.filter((m) => m.type === 'photo').length
 
   // ── Tambah foto dari galeri
   const handlePhotoGallery = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
+    if (isUnlimitedPhotos) {
+      const previews = files.map((file, i) => ({
+        file,
+        url: URL.createObjectURL(file),
+        type: 'photo' as const,
+        is_cover: mediaFiles.length === 0 && i === 0,
+      }))
+      setMediaFiles(prev => [...prev, ...previews])
+      e.target.value = ''
+      return
+    }
     const remaining = maxPhotos - currentPhotoCount
     if (remaining <= 0) {
       toast.error(`Batas maksimal ${maxPhotos} foto untuk paket Anda`)
@@ -107,7 +121,7 @@ export default function ListingForm({
   const handleCamera = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    if (currentPhotoCount >= maxPhotos) {
+    if (!isUnlimitedPhotos && currentPhotoCount >= maxPhotos) {
       toast.error(`Batas maksimal ${maxPhotos} foto untuk paket Anda`)
       e.target.value = ''
       return
@@ -121,13 +135,28 @@ export default function ListingForm({
   }
 
   // ── Upload video (max ~150MB untuk 2 menit)
-  const handleVideo = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // ── Baca durasi video asli (bukan cuma ukuran file)
+  const getVideoDuration = (file: File): Promise<number> => {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement('video')
+      video.preload = 'metadata'
+      video.onloadedmetadata = () => {
+        URL.revokeObjectURL(video.src)
+        resolve(video.duration)
+      }
+      video.onerror = () => reject(new Error('Gagal membaca durasi video'))
+      video.src = URL.createObjectURL(file)
+    })
+  }
+
+  const handleVideo = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
+    e.target.value = ''
     if (!file) return
 
-    // Validasi ukuran: max 150MB
+    // Validasi ukuran: max 150MB (batas teknis upload, terpisah dari batas paket)
     if (file.size > 150 * 1024 * 1024) {
-      toast.error('Video maksimal 150MB (~2 menit)')
+      toast.error('Video maksimal 150MB')
       return
     }
 
@@ -136,6 +165,22 @@ export default function ListingForm({
     if (existingVideo) {
       toast.error('Hanya 1 video per listing')
       return
+    }
+
+    // Validasi durasi sesuai batas paket agent
+    if (maxVideoSeconds !== -1) {
+      try {
+        const duration = await getVideoDuration(file)
+        if (duration > maxVideoSeconds) {
+          toast.error(
+            `Video maksimal ${maxVideoSeconds} detik untuk paket Anda (video ini ${Math.round(duration)} detik)`
+          )
+          return
+        }
+      } catch {
+        toast.error('Gagal membaca durasi video, coba file lain')
+        return
+      }
     }
 
     setMediaFiles(prev => [...prev, {
@@ -571,7 +616,7 @@ export default function ListingForm({
           <button type="button"
             onClick={() => videoInputRef.current?.click()}
             className="flex items-center gap-2 px-4 py-2.5 bg-purple-50 text-purple-700 rounded-xl border border-purple-200 hover:bg-purple-100 transition text-sm font-medium">
-            <Video size={16} /> Upload Video (~2 menit)
+            <Video size={16} /> Upload Video
           </button>
         </div>
 
@@ -584,10 +629,14 @@ export default function ListingForm({
           onChange={handleVideo} className="hidden" />
 
         <p className="text-xs text-gray-400 mb-1">
-          {currentPhotoCount}/{maxPhotos} foto terpakai sesuai paket Anda
+          {isUnlimitedPhotos
+            ? `${currentPhotoCount} foto (Unlimited sesuai paket Anda)`
+            : `${currentPhotoCount}/${maxPhotos} foto terpakai sesuai paket Anda`}
         </p>
         <p className="text-xs text-gray-400 mb-4">
-          Foto: JPG/PNG maks 10MB per file · Video: MP4 maks 150MB (~2 menit) · Tap foto untuk set sebagai cover
+          Foto: JPG/PNG maks 10MB per file · Video: maks{' '}
+          {maxVideoSeconds === -1 ? 'unlimited' : `${maxVideoSeconds} detik`} sesuai paket Anda ·
+          Tap foto untuk set sebagai cover
         </p>
 
         {/* Preview Grid */}
