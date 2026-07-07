@@ -9,7 +9,25 @@ export type Profile = {
   max_listings: number
   max_photos_per_listing: number
   max_video_seconds: number
+  bank_name: string | null
+  bank_account_number: string | null
+  bank_account_holder: string | null
+  qris_image_url: string | null
   created_at: string
+}
+
+export type UpgradeRequest = {
+  id: string
+  agent_id: string
+  plan_id: string
+  status: 'pending' | 'approved' | 'rejected'
+  proof_url: string | null
+  proof_storage_path: string | null
+  note: string | null
+  created_at: string
+  reviewed_at: string | null
+  profiles?: Profile
+  plans?: Plan
 }
 
 export type Listing = {

@@ -1,8 +1,9 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import type { Profile, Plan } from '@/lib/types'
+import type { Profile, Plan, UpgradeRequest } from '@/lib/types'
 import AgentRoleToggle from './agents/AgentRoleToggle'
 import AgentPlanEditor from './agents/AgentPlanEditor'
 import PlanPricingEditor from './PlanPricingEditor'
+import UpgradeRequestsPanel from './UpgradeRequestsPanel'
 
 export default async function AdminPage() {
   const supabase = await createServerSupabaseClient()
@@ -17,10 +18,19 @@ export default async function AdminPage() {
     .select('*')
     .order('sort_order', { ascending: true })
 
+  const { data: upgradeRequests } = await supabase
+    .from('upgrade_requests')
+    .select('*, profiles(full_name)')
+    .order('created_at', { ascending: false })
+
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-800 mb-2">Kelola Agent</h1>
       <p className="text-gray-500 text-sm mb-6">{profiles?.length || 0} agent terdaftar</p>
+
+      {upgradeRequests && upgradeRequests.length > 0 && (
+        <UpgradeRequestsPanel requests={upgradeRequests as UpgradeRequest[]} />
+      )}
 
       {plans && plans.length > 0 && <PlanPricingEditor plans={plans as Plan[]} />}
 
