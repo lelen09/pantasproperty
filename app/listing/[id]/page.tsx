@@ -6,6 +6,7 @@ import ListingDetailGallery from './ListingDetailGallery'
 import AgentBadge from '@/components/AgentBadge'
 import GoogleMapsIcon from '@/components/icons/GoogleMapsIcon'
 import WaContactButton from './WaContactButton'
+import BrosurButton from './BrosurButton'
 import {
   MapPin, BedDouble, Bath, Layers, Car, FileCheck, Compass,
   ShieldCheck, Route, TrafficCone, School, Store, User,
@@ -242,6 +243,7 @@ export default async function ListingDetailPage({
               </div>
 
               <WaContactButton listing={listing} />
+              <BrosurButton listing={listing} />
             </div>
           </div>
 
