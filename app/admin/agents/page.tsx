@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import type { Profile } from '@/lib/types'
 import AgentRoleToggle from './AgentRoleToggle'
+import AgentPlanEditor from './AgentPlanEditor'
 
 export default async function AdminAgentsPage() {
   const supabase = await createServerSupabaseClient()
@@ -16,12 +17,15 @@ export default async function AdminAgentsPage() {
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm divide-y divide-gray-100">
         {(profiles as Profile[] | null)?.map((profile) => (
-          <div key={profile.id} className="flex items-center justify-between p-4">
-            <div>
-              <p className="font-semibold text-gray-800">{profile.full_name}</p>
-              <p className="text-sm text-gray-500">{profile.phone_whatsapp}</p>
+          <div key={profile.id} className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-semibold text-gray-800">{profile.full_name}</p>
+                <p className="text-sm text-gray-500">{profile.phone_whatsapp}</p>
+              </div>
+              <AgentRoleToggle profileId={profile.id} role={profile.role} />
             </div>
-            <AgentRoleToggle profileId={profile.id} role={profile.role} />
+            <AgentPlanEditor profile={profile} />
           </div>
         ))}
         {(!profiles || profiles.length === 0) && (

@@ -24,7 +24,7 @@ export default async function HomePage() {
     .select(
       `
       *,
-      profiles (id, full_name, phone_whatsapp, avatar_url),
+      profiles (id, full_name, phone_whatsapp, avatar_url, agent_badge),
       listing_media (*)
     `
     )

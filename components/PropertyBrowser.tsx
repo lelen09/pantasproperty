@@ -63,6 +63,11 @@ export default function PropertyBrowser({ listings }: { listings: Listing[] }) {
           (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         )
     }
+
+    // Listing yang sedang di-boost admin selalu didahulukan, apapun urutannya
+    const isBoosted = (l: Listing) => !!l.boosted_until && new Date(l.boosted_until) > new Date()
+    result = [...result].sort((a, b) => Number(isBoosted(b)) - Number(isBoosted(a)))
+
     return result
   }, [listings, query, city, propertyType, priceRangeIdx, sortBy])
 

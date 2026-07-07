@@ -1,6 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { Plus, Pencil } from 'lucide-react'
+import { Plus, Pencil, Lock } from 'lucide-react'
 import type { Listing } from '@/lib/types'
 import DashboardListingActions from './DashboardListingActions'
 
@@ -21,6 +21,16 @@ export default async function DashboardPage() {
     .select('*, listing_media(*)')
     .eq('agent_id', user!.id)
     .order('created_at', { ascending: false })
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('max_listings')
+    .eq('id', user!.id)
+    .single()
+
+  const totalListings = listings?.length || 0
+  const maxListings = profile?.max_listings ?? 5
+  const limitReached = totalListings >= maxListings
 
   return (
     <div>
@@ -44,15 +54,24 @@ export default async function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Listing Saya</h1>
           <p className="text-gray-500 text-sm">
-            {listings?.length || 0} listing total
+            {totalListings} dari {maxListings} listing terpakai
           </p>
         </div>
-        <Link
-          href="/dashboard/listing/new"
-          className="flex items-center gap-2 px-4 py-2.5 bg-navy-600 text-white rounded-xl font-semibold hover:bg-navy-700 transition"
-        >
-          <Plus size={18} /> Tambah Listing
-        </Link>
+        {limitReached ? (
+          <div
+            className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-400 rounded-xl font-semibold cursor-not-allowed"
+            title="Kuota listing habis, hubungi admin untuk upgrade paket"
+          >
+            <Lock size={16} /> Kuota Penuh
+          </div>
+        ) : (
+          <Link
+            href="/dashboard/listing/new"
+            className="flex items-center gap-2 px-4 py-2.5 bg-navy-600 text-white rounded-xl font-semibold hover:bg-navy-700 transition"
+          >
+            <Plus size={18} /> Tambah Listing
+          </Link>
+        )}
       </div>
 
       {listings && listings.length > 0 ? (

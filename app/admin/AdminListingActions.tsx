@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Rocket } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 
@@ -15,13 +15,17 @@ const STATUS_LABEL: Record<string, string> = {
 export default function AdminListingActions({
   listingId,
   status,
+  boostedUntil,
 }: {
   listingId: string
   status: 'active' | 'sold' | 'inactive'
+  boostedUntil: string | null
 }) {
   const supabase = createClient()
   const router = useRouter()
   const [busy, setBusy] = useState(false)
+
+  const isBoosted = boostedUntil && new Date(boostedUntil) > new Date()
 
   const changeStatus = async (newStatus: string) => {
     if (newStatus === status) return
@@ -34,6 +38,23 @@ export default function AdminListingActions({
       toast.error('Gagal mengubah status')
     } else {
       toast.success(`Status diubah menjadi ${STATUS_LABEL[newStatus]}`)
+      router.refresh()
+    }
+    setBusy(false)
+  }
+
+  const handleBoost = async (days: number) => {
+    setBusy(true)
+    const until =
+      days === 0 ? null : new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString()
+    const { error } = await supabase
+      .from('listings')
+      .update({ boosted_until: until })
+      .eq('id', listingId)
+    if (error) {
+      toast.error('Gagal mengatur boost')
+    } else {
+      toast.success(days === 0 ? 'Boost dibatalkan' : `Listing di-boost ${days} hari`)
       router.refresh()
     }
     setBusy(false)
@@ -81,6 +102,24 @@ export default function AdminListingActions({
         <option value="active">Aktif</option>
         <option value="sold">Terjual</option>
         <option value="inactive">Nonaktif</option>
+      </select>
+      <select
+        value={isBoosted ? 'boosted' : 'none'}
+        disabled={busy}
+        onChange={(e) => {
+          if (e.target.value === '7') handleBoost(7)
+          else if (e.target.value === '30') handleBoost(30)
+          else handleBoost(0)
+        }}
+        className={`text-xs font-medium border rounded-lg px-2 py-1.5 outline-none focus:ring-2 focus:ring-navy-500 disabled:opacity-50 ${
+          isBoosted ? 'bg-purple-50 border-purple-200 text-purple-700' : 'bg-white border-gray-200 text-gray-600'
+        }`}
+        title="Boost listing ke urutan atas"
+      >
+        <option value="none">🚀 Tidak boost</option>
+        <option value="7">🚀 Boost 7 hari</option>
+        <option value="30">🚀 Boost 30 hari</option>
+        {isBoosted && <option value="boosted">🚀 Aktif sampai {new Date(boostedUntil!).toLocaleDateString('id-ID')}</option>}
       </select>
       <button
         onClick={handleDelete}

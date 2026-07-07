@@ -26,7 +26,7 @@ export default async function RenovasiPage() {
     .select(
       `
       *,
-      profiles (id, full_name, phone_whatsapp, avatar_url),
+      profiles (id, full_name, phone_whatsapp, avatar_url, agent_badge),
       service_media (*)
     `
     )

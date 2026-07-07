@@ -61,7 +61,7 @@ export default async function AdminPage() {
                 </p>
               </div>
               <div className="flex justify-end sm:shrink-0">
-                <AdminListingActions listingId={listing.id} status={listing.status} />
+                <AdminListingActions listingId={listing.id} status={listing.status} boostedUntil={listing.boosted_until} />
               </div>
             </div>
           ))}

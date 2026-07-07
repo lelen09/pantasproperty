@@ -9,6 +9,7 @@ import type { Listing } from '@/lib/types'
 import { isFavoriteListing, toggleFavoriteListing } from '@/lib/favorites'
 import { estimateKprMonthly, formatRupiahShort } from '@/lib/kpr'
 import GoogleMapsIcon from '@/components/icons/GoogleMapsIcon'
+import AgentBadge from '@/components/AgentBadge'
 import toast from 'react-hot-toast'
 
 function formatRupiah(angka: number) {
@@ -80,15 +81,21 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 
       {/* ── FOTO / VIDEO */}
       <div className="relative aspect-[4/3] bg-gray-100">
-        {/* Badge promosi */}
-        {listing.badge !== 'none' && (
-          <span
-            className={`absolute top-2 left-2 z-10 text-xs font-bold px-2.5 py-1 rounded-full text-white ${
-              listing.badge === 'hot' ? 'bg-red-500' : 'bg-gold-500'
-            }`}
-          >
-            {listing.badge === 'hot' ? '🔥 HOT' : '⭐ EXCLUSIVE'}
+        {/* Badge boost (prioritas tertinggi) atau promosi */}
+        {listing.boosted_until && new Date(listing.boosted_until) > new Date() ? (
+          <span className="absolute top-2 left-2 z-10 text-xs font-bold px-2.5 py-1 rounded-full text-white bg-purple-600">
+            🚀 Promoted
           </span>
+        ) : (
+          listing.badge !== 'none' && (
+            <span
+              className={`absolute top-2 left-2 z-10 text-xs font-bold px-2.5 py-1 rounded-full text-white ${
+                listing.badge === 'hot' ? 'bg-red-500' : 'bg-gold-500'
+              }`}
+            >
+              {listing.badge === 'hot' ? '🔥 HOT' : '⭐ EXCLUSIVE'}
+            </span>
+          )
         )}
         {/* Favorit & Share */}
         <div className="absolute top-2 right-2 z-10 flex gap-1.5">
@@ -264,7 +271,9 @@ export default function ListingCard({ listing }: { listing: Listing }) {
               </div>
               <div className="min-w-0">
                 <p className="text-xs text-gray-400">Agent</p>
-                <p className="text-sm font-medium text-gray-700 truncate">{agent?.full_name}</p>
+                <p className="text-sm font-medium text-gray-700 truncate flex items-center gap-1">
+                  {agent?.full_name} <AgentBadge badge={(agent as any)?.agent_badge} />
+                </p>
               </div>
             </div>
 

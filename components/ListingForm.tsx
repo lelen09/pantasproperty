@@ -2,7 +2,7 @@
 // components/ListingForm.tsx
 // Form tambah/edit listing rumah — termasuk upload foto & video
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
@@ -57,31 +57,67 @@ export default function ListingForm({
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({ defaultValues })
   const [mediaFiles, setMediaFiles] = useState<MediaPreview[]>([])
   const [uploading, setUploading] = useState(false)
+  const [maxPhotos, setMaxPhotos] = useState(10)
   const photoInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const videoInputRef = useRef<HTMLInputElement>(null)
 
+  useEffect(() => {
+    const fetchLimit = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user) return
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('max_photos_per_listing')
+        .eq('id', user.id)
+        .single()
+      if (profile?.max_photos_per_listing) setMaxPhotos(profile.max_photos_per_listing)
+    }
+    fetchLimit()
+  }, [supabase])
+
+  const currentPhotoCount = mediaFiles.filter((m) => m.type === 'photo').length
+
   // ── Tambah foto dari galeri
   const handlePhotoGallery = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
-    const previews = files.map((file, i) => ({
+    const remaining = maxPhotos - currentPhotoCount
+    if (remaining <= 0) {
+      toast.error(`Batas maksimal ${maxPhotos} foto untuk paket Anda`)
+      e.target.value = ''
+      return
+    }
+    const filesToAdd = files.slice(0, remaining)
+    if (files.length > remaining) {
+      toast.error(`Hanya ${remaining} foto ditambahkan (batas paket: ${maxPhotos} foto)`)
+    }
+    const previews = filesToAdd.map((file, i) => ({
       file,
       url: URL.createObjectURL(file),
       type: 'photo' as const,
       is_cover: mediaFiles.length === 0 && i === 0,
     }))
     setMediaFiles(prev => [...prev, ...previews])
+    e.target.value = ''
   }
 
   // ── Ambil foto dari kamera
   const handleCamera = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    if (currentPhotoCount >= maxPhotos) {
+      toast.error(`Batas maksimal ${maxPhotos} foto untuk paket Anda`)
+      e.target.value = ''
+      return
+    }
     setMediaFiles(prev => [...prev, {
       file, url: URL.createObjectURL(file),
       type: 'photo',
       is_cover: prev.length === 0,
     }])
+    e.target.value = ''
   }
 
   // ── Upload video (max ~150MB untuk 2 menit)
@@ -547,6 +583,9 @@ export default function ListingForm({
         <input ref={videoInputRef} type="file" accept="video/*"
           onChange={handleVideo} className="hidden" />
 
+        <p className="text-xs text-gray-400 mb-1">
+          {currentPhotoCount}/{maxPhotos} foto terpakai sesuai paket Anda
+        </p>
         <p className="text-xs text-gray-400 mb-4">
           Foto: JPG/PNG maks 10MB per file · Video: MP4 maks 150MB (~2 menit) · Tap foto untuk set sebagai cover
         </p>

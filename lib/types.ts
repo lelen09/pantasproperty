@@ -4,6 +4,10 @@ export type Profile = {
   phone_whatsapp: string
   role: 'admin' | 'agent'
   avatar_url: string | null
+  plan: 'free' | 'silver' | 'gold' | 'platinum'
+  agent_badge: 'none' | 'verified' | 'top_agent' | 'super_agent'
+  max_listings: number
+  max_photos_per_listing: number
   created_at: string
 }
 
@@ -35,6 +39,7 @@ export type Listing = {
   nearby_school: string | null
   nearby_minimarket: string | null
   badge: 'none' | 'hot' | 'exclusive'
+  boosted_until: string | null
   created_at: string
   updated_at: string
   profiles?: Profile // joined

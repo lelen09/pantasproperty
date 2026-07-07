@@ -39,7 +39,7 @@ export default function FavoritPage() {
       if (listingIds.length > 0) {
         const { data } = await supabase
           .from('listings')
-          .select('*, profiles(id, full_name, phone_whatsapp, avatar_url), listing_media(*)')
+          .select('*, profiles(id, full_name, phone_whatsapp, avatar_url, agent_badge), listing_media(*)')
           .in('id', listingIds)
         setListings((data as Listing[]) || [])
       }
@@ -47,7 +47,7 @@ export default function FavoritPage() {
       if (serviceIds.length > 0) {
         const { data } = await supabase
           .from('services')
-          .select('*, profiles(id, full_name, phone_whatsapp, avatar_url), service_media(*)')
+          .select('*, profiles(id, full_name, phone_whatsapp, avatar_url, agent_badge), service_media(*)')
           .in('id', serviceIds)
         setServices((data as Service[]) || [])
       }

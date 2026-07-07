@@ -7,6 +7,7 @@ import { createPortal } from 'react-dom'
 import { MapPin, MessageCircle, User, X, Hammer, ImageOff, Heart, Share2, Play } from 'lucide-react'
 import type { Service } from '@/lib/types'
 import { isFavoriteService, toggleFavoriteService } from '@/lib/favorites'
+import AgentBadge from '@/components/AgentBadge'
 import toast from 'react-hot-toast'
 
 function formatRupiah(angka: number) {
@@ -173,7 +174,9 @@ export default function ServiceCard({ service }: { service: Service }) {
               </div>
               <div className="min-w-0">
                 <p className="text-xs text-gray-400">Penyedia Jasa</p>
-                <p className="text-sm font-medium text-gray-700 truncate">{agent?.full_name}</p>
+                <p className="text-sm font-medium text-gray-700 truncate flex items-center gap-1">
+                  {agent?.full_name} <AgentBadge badge={(agent as any)?.agent_badge} />
+                </p>
               </div>
             </div>
 
