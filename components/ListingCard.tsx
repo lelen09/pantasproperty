@@ -3,10 +3,12 @@
 // Card rumah untuk halaman publik — dengan tombol WhatsApp agent
 
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { MapPin, BedDouble, Bath, Layers, Car, MessageCircle, Play, User, X, Heart, Share2, FileCheck, Compass, ShieldCheck, Route, TrafficCone, School, Store } from 'lucide-react'
 import type { Listing } from '@/lib/types'
 import { isFavoriteListing, toggleFavoriteListing } from '@/lib/favorites'
 import { estimateKprMonthly, formatRupiahShort } from '@/lib/kpr'
+import GoogleMapsIcon from '@/components/icons/GoogleMapsIcon'
 import toast from 'react-hot-toast'
 
 function formatRupiah(angka: number) {
@@ -19,6 +21,11 @@ export default function ListingCard({ listing }: { listing: Listing }) {
   const [showVideo, setShowVideo] = useState(false)
   const [showAgentModal, setShowAgentModal] = useState(false)
   const [isFav, setIsFav] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     setIsFav(isFavoriteListing(listing.id))
@@ -60,6 +67,13 @@ export default function ListingCard({ listing }: { listing: Listing }) {
     `Halo ${agent?.full_name}, saya tertarik dengan properti "${listing.title}" yang Anda tawarkan. Boleh info lebih lanjut?`
   )
   const waLink = `https://wa.me/${waNumber}?text=${waMessage}`
+
+  // Jaga-jaga kalau ada listing lama yang URL Maps-nya tersimpan tanpa https://
+  const mapsUrl = listing.google_maps_url
+    ? /^https?:\/\//i.test(listing.google_maps_url)
+      ? listing.google_maps_url
+      : `https://${listing.google_maps_url}`
+    : null
 
   return (
     <div id={`listing-${listing.id}`} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow scroll-mt-20">
@@ -265,20 +279,20 @@ export default function ListingCard({ listing }: { listing: Listing }) {
           </div>
 
           {/* Link Google Maps */}
-          {listing.google_maps_url && (
+          {mapsUrl && (
             <a
-              href={listing.google_maps_url}
+              href={mapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-2 text-xs text-blue-500 flex items-center gap-1 hover:underline">
-              <MapPin size={12} /> Lihat di Google Maps
+              className="mt-2 text-xs text-blue-500 flex items-center gap-1.5 hover:underline">
+              <GoogleMapsIcon size={14} /> Lihat di Google Maps
             </a>
           )}
         </div>
       </div>
 
-      {/* ── MODAL DETAIL AGENT (foto besar, nama, nomor WA) */}
-      {showAgentModal && (
+      {/* ── MODAL DETAIL AGENT (foto besar, nama, nomor WA) — via portal */}
+      {mounted && showAgentModal && createPortal(
         <div
           className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
           onClick={() => setShowAgentModal(false)}
@@ -324,7 +338,8 @@ export default function ListingCard({ listing }: { listing: Listing }) {
               </a>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

@@ -39,7 +39,7 @@ export default function FavoritPage() {
       if (listingIds.length > 0) {
         const { data } = await supabase
           .from('listings')
-          .select('*, profiles(id, full_name, phone_whatsapp), listing_media(*)')
+          .select('*, profiles(id, full_name, phone_whatsapp, avatar_url), listing_media(*)')
           .in('id', listingIds)
         setListings((data as Listing[]) || [])
       }

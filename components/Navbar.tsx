@@ -25,16 +25,16 @@ export default function Navbar({
 
   return (
     <nav className="sticky top-0 z-30 bg-white border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 font-bold text-navy-700">
-          <img src="/logo.png" alt="AS REALTY" className="h-9 w-9 object-contain" />
-          <span className="tracking-wide">AS REALTY</span>
+      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-2">
+        <Link href="/" className="flex items-center gap-2 font-bold text-navy-700 shrink-0 whitespace-nowrap">
+          <img src="/logo.png" alt="AS REALTY" className="h-9 w-9 object-contain shrink-0" />
+          <span className="tracking-wide text-sm sm:text-base">AS REALTY</span>
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-0.5 sm:gap-2 shrink-0">
           <Link
             href="/favorit"
-            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 hover:text-red-500 rounded-xl transition"
+            className="flex items-center gap-1.5 px-2 sm:px-3 py-2 text-sm font-medium text-gray-600 hover:text-red-500 rounded-xl transition"
           >
             <Heart size={16} /> <span className="hidden sm:inline">Favorit</span>
           </Link>
@@ -43,35 +43,35 @@ export default function Navbar({
               {isAdmin ? (
                 <Link
                   href="/admin"
-                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 hover:text-navy-600 rounded-xl transition"
+                  className="flex items-center gap-1.5 px-2 sm:px-3 py-2 text-sm font-medium text-gray-600 hover:text-navy-600 rounded-xl transition"
                 >
-                  <Users size={16} /> Admin
+                  <Users size={16} /> <span className="hidden sm:inline">Admin</span>
                 </Link>
               ) : (
                 <Link
                   href="/dashboard"
-                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 hover:text-navy-600 rounded-xl transition"
+                  className="flex items-center gap-1.5 px-2 sm:px-3 py-2 text-sm font-medium text-gray-600 hover:text-navy-600 rounded-xl transition"
                 >
-                  <LayoutDashboard size={16} /> Dashboard
+                  <LayoutDashboard size={16} /> <span className="hidden sm:inline">Dashboard</span>
                 </Link>
               )}
               <Link
                 href="/dashboard/profile"
-                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 hover:text-navy-600 rounded-xl transition"
+                className="flex items-center gap-1.5 px-2 sm:px-3 py-2 text-sm font-medium text-gray-600 hover:text-navy-600 rounded-xl transition"
               >
-                <UserCircle size={16} /> Profil
+                <UserCircle size={16} /> <span className="hidden sm:inline">Profil</span>
               </Link>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-500 hover:text-red-600 rounded-xl transition"
+                className="flex items-center gap-1.5 px-2 sm:px-3 py-2 text-sm font-medium text-gray-500 hover:text-red-600 rounded-xl transition"
               >
-                <LogOut size={16} /> Keluar
+                <LogOut size={16} /> <span className="hidden sm:inline">Keluar</span>
               </button>
             </>
           ) : (
             <Link
               href="/auth/login"
-              className="px-4 py-2 text-sm font-semibold bg-navy-600 text-white rounded-xl hover:bg-navy-700 transition"
+              className="px-3 sm:px-4 py-2 text-sm font-semibold bg-navy-600 text-white rounded-xl hover:bg-navy-700 transition whitespace-nowrap"
             >
               Masuk
             </Link>

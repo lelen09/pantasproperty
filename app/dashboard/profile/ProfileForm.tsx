@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 import { Camera, User } from 'lucide-react'
 import type { Profile } from '@/lib/types'
+import ImageCropModal from '@/components/ImageCropModal'
 
 export default function ProfileForm({
   profile,
@@ -19,10 +20,13 @@ export default function ProfileForm({
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || '')
   const [saving, setSaving] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [cropSrc, setCropSrc] = useState<string | null>(null)
   const avatarInputRef = useRef<HTMLInputElement>(null)
 
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // ── Langkah 1: file dipilih, buka modal crop dulu (belum upload)
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
+    e.target.value = '' // supaya bisa pilih file yang sama lagi kalau mau ulang
     if (!file) return
 
     if (file.size > 5 * 1024 * 1024) {
@@ -30,17 +34,22 @@ export default function ProfileForm({
       return
     }
 
+    setCropSrc(URL.createObjectURL(file))
+  }
+
+  // ── Langkah 2: setelah crop dikonfirmasi, baru upload hasilnya
+  const handleCropComplete = async (blob: Blob) => {
+    setCropSrc(null)
     setUploadingAvatar(true)
     const toastId = toast.loading('Mengupload foto...')
 
     try {
-      const ext = file.name.split('.').pop()
-      const fileName = `avatar-${Date.now()}.${ext}`
+      const fileName = `avatar-${Date.now()}.jpg`
       const path = `${profile!.id}/${fileName}`
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(path, file, { upsert: true })
+        .upload(path, blob, { upsert: true, contentType: 'image/jpeg' })
       if (uploadError) throw uploadError
 
       const {
@@ -53,9 +62,7 @@ export default function ProfileForm({
         .eq('id', profile!.id)
       if (updateError) throw updateError
 
-      // FIX: sebelumnya avatar lama tidak pernah dihapus dari Storage,
-      // jadi menumpuk terus tiap kali ganti foto. Sekarang dibersihkan
-      // setelah foto baru berhasil di-upload & disimpan.
+      // Bersihkan avatar lama agar tidak menumpuk di storage
       const { data: oldFiles } = await supabase.storage.from('avatars').list(profile!.id)
       if (oldFiles && oldFiles.length > 0) {
         const staleFiles = oldFiles
@@ -119,7 +126,7 @@ export default function ProfileForm({
             ref={avatarInputRef}
             type="file"
             accept="image/*"
-            onChange={handleAvatarChange}
+            onChange={handleFileSelect}
             className="hidden"
           />
         </div>
@@ -127,6 +134,14 @@ export default function ProfileForm({
           {uploadingAvatar ? 'Mengupload...' : 'Foto ini akan tampil ke customer'}
         </p>
       </div>
+
+      {cropSrc && (
+        <ImageCropModal
+          imageSrc={cropSrc}
+          onCancel={() => setCropSrc(null)}
+          onCropComplete={handleCropComplete}
+        />
+      )}
 
       <div>
         <label className="text-sm font-medium text-gray-700">Email</label>

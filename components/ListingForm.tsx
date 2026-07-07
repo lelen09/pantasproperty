@@ -169,6 +169,15 @@ export default function ListingForm({
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Belum login')
 
+      // FIX: kalau agent paste link tanpa "https://" di depan, browser akan
+      // menganggapnya link internal (relatif ke domain sendiri) dan berujung
+      // 404. Di sini kita normalisasi otomatis.
+      const normalizeMapsUrl = (url: string) => {
+        const trimmed = url.trim()
+        if (!trimmed) return null
+        return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
+      }
+
       const payload = {
         title: data.title,
         price: parseInt(data.price.replace(/\D/g, '')),
@@ -182,7 +191,7 @@ export default function ListingForm({
         address: data.address,
         city: data.city,
         province: data.province,
-        google_maps_url: data.google_maps_url || null,
+        google_maps_url: normalizeMapsUrl(data.google_maps_url),
         property_type: data.property_type || 'Rumah',
         certificate_type: data.certificate_type || null,
         orientation: data.orientation || null,

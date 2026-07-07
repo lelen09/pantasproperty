@@ -3,6 +3,7 @@
 // Card jasa renovasi untuk halaman publik — dengan tombol WhatsApp agent
 
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { MapPin, MessageCircle, User, X, Hammer, ImageOff, Heart, Share2 } from 'lucide-react'
 import type { Service } from '@/lib/types'
 import { isFavoriteService, toggleFavoriteService } from '@/lib/favorites'
@@ -17,6 +18,11 @@ function formatRupiah(angka: number) {
 export default function ServiceCard({ service }: { service: Service }) {
   const [showAgentModal, setShowAgentModal] = useState(false)
   const [isFav, setIsFav] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     setIsFav(isFavoriteService(service.id))
@@ -163,8 +169,8 @@ export default function ServiceCard({ service }: { service: Service }) {
         </div>
       </div>
 
-      {/* ── MODAL DETAIL AGENT */}
-      {showAgentModal && (
+      {/* ── MODAL DETAIL AGENT — via portal */}
+      {mounted && showAgentModal && createPortal(
         <div
           className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
           onClick={() => setShowAgentModal(false)}
@@ -210,7 +216,8 @@ export default function ServiceCard({ service }: { service: Service }) {
               </a>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
