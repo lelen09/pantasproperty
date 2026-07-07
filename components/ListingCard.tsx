@@ -3,7 +3,7 @@
 // Card rumah untuk halaman publik — dengan tombol WhatsApp agent
 
 import { useState, useEffect } from 'react'
-import { MapPin, BedDouble, Bath, Layers, Car, MessageCircle, Play, User, X, Heart, Share2 } from 'lucide-react'
+import { MapPin, BedDouble, Bath, Layers, Car, MessageCircle, Play, User, X, Heart, Share2, FileCheck, Compass, ShieldCheck, Route, TrafficCone, School, Store } from 'lucide-react'
 import type { Listing } from '@/lib/types'
 import { isFavoriteListing, toggleFavoriteListing } from '@/lib/favorites'
 import { estimateKprMonthly, formatRupiahShort } from '@/lib/kpr'
@@ -66,6 +66,16 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 
       {/* ── FOTO / VIDEO */}
       <div className="relative aspect-[4/3] bg-gray-100">
+        {/* Badge promosi */}
+        {listing.badge !== 'none' && (
+          <span
+            className={`absolute top-2 left-2 z-10 text-xs font-bold px-2.5 py-1 rounded-full text-white ${
+              listing.badge === 'hot' ? 'bg-red-500' : 'bg-gold-500'
+            }`}
+          >
+            {listing.badge === 'hot' ? '🔥 HOT' : '⭐ EXCLUSIVE'}
+          </span>
+        )}
         {/* Favorit & Share */}
         <div className="absolute top-2 right-2 z-10 flex gap-1.5">
           <button
@@ -142,6 +152,9 @@ export default function ListingCard({ listing }: { listing: Listing }) {
         </p>
 
         {/* Judul */}
+        <span className="inline-block bg-navy-50 text-navy-700 text-xs font-medium px-2 py-0.5 rounded-full mb-1.5">
+          {listing.property_type}
+        </span>
         <h3 className="font-semibold text-gray-800 text-base leading-snug mb-2 line-clamp-2">
           {listing.title}
         </h3>
@@ -170,10 +183,58 @@ export default function ListingCard({ listing }: { listing: Listing }) {
           )}
         </div>
 
-        <div className="flex gap-2 text-xs text-gray-500 mb-4">
+        <div className="flex gap-2 text-xs text-gray-500 mb-3 flex-wrap">
           <span className="bg-gray-100 px-2 py-1 rounded-lg">LT: {listing.land_area} m²</span>
           <span className="bg-gray-100 px-2 py-1 rounded-lg">LB: {listing.building_area} m²</span>
         </div>
+
+        {/* Info tambahan */}
+        {(listing.certificate_type || listing.orientation || listing.is_flood_free || listing.road_access) && (
+          <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500 mb-3">
+            {listing.certificate_type && (
+              <span className="flex items-center gap-1">
+                <FileCheck size={12} className="text-gray-400" /> {listing.certificate_type}
+              </span>
+            )}
+            {listing.orientation && (
+              <span className="flex items-center gap-1">
+                <Compass size={12} className="text-gray-400" /> Hadap {listing.orientation}
+              </span>
+            )}
+            {listing.is_flood_free && (
+              <span className="flex items-center gap-1">
+                <ShieldCheck size={12} className="text-gray-400" /> Bebas Banjir
+              </span>
+            )}
+            {listing.road_access && (
+              <span className="flex items-center gap-1">
+                <Route size={12} className="text-gray-400" /> {listing.road_access}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Fasilitas sekitar */}
+        {(listing.nearby_toll || listing.nearby_school || listing.nearby_minimarket) && (
+          <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500 mb-4">
+            {listing.nearby_toll && (
+              <span className="flex items-center gap-1">
+                <TrafficCone size={12} className="text-gray-400" /> {listing.nearby_toll} ke Tol
+              </span>
+            )}
+            {listing.nearby_school && (
+              <span className="flex items-center gap-1">
+                <School size={12} className="text-gray-400" /> {listing.nearby_school} ke Sekolah
+              </span>
+            )}
+            {listing.nearby_minimarket && (
+              <span className="flex items-center gap-1">
+                <Store size={12} className="text-gray-400" /> {listing.nearby_minimarket} ke
+                Minimarket
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Divider */}
         <div className="border-t border-gray-100 pt-3">

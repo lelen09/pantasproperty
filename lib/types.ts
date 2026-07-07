@@ -26,6 +26,15 @@ export type Listing = {
   longitude: number | null
   google_maps_url: string | null
   status: 'active' | 'sold' | 'inactive'
+  property_type: 'Rumah' | 'Apartemen' | 'Tanah' | 'Ruko' | 'Gudang'
+  certificate_type: string | null
+  orientation: string | null
+  is_flood_free: boolean | null
+  road_access: string | null
+  nearby_toll: string | null
+  nearby_school: string | null
+  nearby_minimarket: string | null
+  badge: 'none' | 'hot' | 'exclusive'
   created_at: string
   updated_at: string
   profiles?: Profile // joined

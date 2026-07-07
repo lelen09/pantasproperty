@@ -26,6 +26,15 @@ export default function EditListingClient({ listing }: { listing: Listing }) {
           city: listing.city,
           province: listing.province,
           google_maps_url: listing.google_maps_url || '',
+          property_type: listing.property_type || 'Rumah',
+          certificate_type: listing.certificate_type || '',
+          orientation: listing.orientation || '',
+          is_flood_free: listing.is_flood_free || false,
+          road_access: listing.road_access || '',
+          nearby_toll: listing.nearby_toll || '',
+          nearby_school: listing.nearby_school || '',
+          nearby_minimarket: listing.nearby_minimarket || '',
+          badge: listing.badge || 'none',
         }}
         onSuccess={() => {
           router.push('/dashboard')

@@ -1,10 +1,12 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Search, MapPin, DollarSign, ArrowUpDown } from 'lucide-react'
+import { Search, MapPin, DollarSign, ArrowUpDown, Home } from 'lucide-react'
 import ListingCard from './ListingCard'
 import ScrollToHash from './ScrollToHash'
 import type { Listing } from '@/lib/types'
+
+const PROPERTY_TYPES = ['Semua Tipe', 'Rumah', 'Apartemen', 'Tanah', 'Ruko', 'Gudang']
 
 const PRICE_RANGES = [
   { label: 'Semua Harga', min: 0, max: Infinity },
@@ -24,6 +26,7 @@ const SORT_OPTIONS = [
 export default function PropertyBrowser({ listings }: { listings: Listing[] }) {
   const [query, setQuery] = useState('')
   const [city, setCity] = useState('Semua Kota')
+  const [propertyType, setPropertyType] = useState('Semua Tipe')
   const [priceRangeIdx, setPriceRangeIdx] = useState(0)
   const [sortBy, setSortBy] = useState('newest')
 
@@ -40,8 +43,9 @@ export default function PropertyBrowser({ listings }: { listings: Listing[] }) {
         l.title.toLowerCase().includes(query.toLowerCase()) ||
         l.city.toLowerCase().includes(query.toLowerCase())
       const matchCity = city === 'Semua Kota' || l.city === city
+      const matchType = propertyType === 'Semua Tipe' || l.property_type === propertyType
       const matchPrice = l.price >= range.min && l.price < range.max
-      return matchQuery && matchCity && matchPrice
+      return matchQuery && matchCity && matchType && matchPrice
     })
 
     switch (sortBy) {
@@ -60,7 +64,7 @@ export default function PropertyBrowser({ listings }: { listings: Listing[] }) {
         )
     }
     return result
-  }, [listings, query, city, priceRangeIdx, sortBy])
+  }, [listings, query, city, propertyType, priceRangeIdx, sortBy])
 
   return (
     <div>
@@ -79,6 +83,21 @@ export default function PropertyBrowser({ listings }: { listings: Listing[] }) {
         </div>
 
         <div className="flex flex-wrap gap-2">
+          <div className="relative flex-1 min-w-[140px]">
+            <Home size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <select
+              value={propertyType}
+              onChange={(e) => setPropertyType(e.target.value)}
+              className="w-full pl-8 pr-3 py-2 rounded-xl border border-gray-200 text-sm outline-none bg-white"
+            >
+              {PROPERTY_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="relative flex-1 min-w-[140px]">
             <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <select

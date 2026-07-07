@@ -25,6 +25,15 @@ type FormData = {
   city: string
   province: string
   google_maps_url: string
+  property_type: string
+  certificate_type: string
+  orientation: string
+  is_flood_free: boolean
+  road_access: string
+  nearby_toll: string
+  nearby_school: string
+  nearby_minimarket: string
+  badge: string
 }
 
 type MediaPreview = {
@@ -174,6 +183,15 @@ export default function ListingForm({
         city: data.city,
         province: data.province,
         google_maps_url: data.google_maps_url || null,
+        property_type: data.property_type || 'Rumah',
+        certificate_type: data.certificate_type || null,
+        orientation: data.orientation || null,
+        is_flood_free: data.is_flood_free || false,
+        road_access: data.road_access || null,
+        nearby_toll: data.nearby_toll || null,
+        nearby_school: data.nearby_school || null,
+        nearby_minimarket: data.nearby_minimarket || null,
+        badge: data.badge || 'none',
       }
 
       let listing
@@ -225,6 +243,33 @@ export default function ListingForm({
           <Home size={18} className="text-navy-600" /> Informasi Dasar
         </h2>
         <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700">Tipe Properti *</label>
+              <select
+                {...register('property_type', { required: true })}
+                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-navy-500 outline-none bg-white"
+              >
+                <option value="Rumah">Rumah</option>
+                <option value="Apartemen">Apartemen</option>
+                <option value="Tanah">Tanah</option>
+                <option value="Ruko">Ruko</option>
+                <option value="Gudang">Gudang</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700">Badge Promosi</label>
+              <select
+                {...register('badge')}
+                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-navy-500 outline-none bg-white"
+              >
+                <option value="none">Tidak ada</option>
+                <option value="hot">🔥 HOT</option>
+                <option value="exclusive">⭐ EXCLUSIVE</option>
+              </select>
+            </div>
+          </div>
+
           <div>
             <label className="text-sm font-medium text-gray-700">Judul Iklan *</label>
             <input
@@ -368,6 +413,89 @@ export default function ListingForm({
             <p className="text-xs text-gray-400 mt-1">
               Salin link dari Google Maps → Bagikan → Salin Link
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── INFO TAMBAHAN */}
+      <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <FileText size={18} className="text-navy-600" /> Info Tambahan (opsional)
+        </h2>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700">Jenis Sertifikat</label>
+              <select
+                {...register('certificate_type')}
+                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-navy-500 outline-none bg-white"
+              >
+                <option value="">Pilih</option>
+                <option value="SHM">SHM</option>
+                <option value="HGB">HGB</option>
+                <option value="Girik">Girik</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700">Hadap Arah</label>
+              <input
+                {...register('orientation')}
+                placeholder="Timur"
+                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-navy-500 outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-gray-700">Akses Jalan</label>
+            <input
+              {...register('road_access')}
+              placeholder="Muat 2 mobil"
+              className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-navy-500 outline-none"
+            />
+          </div>
+
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <input
+              type="checkbox"
+              {...register('is_flood_free')}
+              className="w-4 h-4 rounded border-gray-300 text-navy-600 focus:ring-navy-500"
+            />
+            Bebas Banjir
+          </label>
+        </div>
+      </section>
+
+      {/* ── FASILITAS SEKITAR */}
+      <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <MapPin size={18} className="text-navy-600" /> Fasilitas Sekitar (opsional)
+        </h2>
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <label className="text-xs font-medium text-gray-700">Ke Tol</label>
+            <input
+              {...register('nearby_toll')}
+              placeholder="1,2 km"
+              className="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-navy-500 outline-none text-sm"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-700">Ke Sekolah</label>
+            <input
+              {...register('nearby_school')}
+              placeholder="300 m"
+              className="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-navy-500 outline-none text-sm"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-700">Ke Minimarket</label>
+            <input
+              {...register('nearby_minimarket')}
+              placeholder="500 m"
+              className="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-navy-500 outline-none text-sm"
+            />
           </div>
         </div>
       </section>
