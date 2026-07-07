@@ -42,3 +42,29 @@ export type ListingMedia = {
   sort_order: number
   created_at: string
 }
+
+export type Service = {
+  id: string
+  agent_id: string
+  title: string
+  category: string
+  description: string | null
+  price_min: number
+  price_max: number | null
+  city: string
+  status: 'active' | 'inactive'
+  created_at: string
+  updated_at: string
+  profiles?: Profile // joined
+  service_media?: ServiceMedia[] // joined
+}
+
+export type ServiceMedia = {
+  id: string
+  service_id: string
+  type: 'before' | 'after' | 'portfolio'
+  url: string
+  storage_path: string
+  sort_order: number
+  created_at: string
+}
