@@ -38,7 +38,7 @@ export default async function AdminPage() {
           {(listings as Listing[]).map((listing) => (
             <div
               key={listing.id}
-              className="flex items-center gap-4 bg-white rounded-2xl border border-gray-100 p-4 shadow-sm"
+              className="flex flex-col gap-3 bg-white rounded-2xl border border-gray-100 p-4 shadow-sm sm:flex-row sm:items-center sm:gap-4"
             >
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-gray-800 truncate">{listing.title}</p>
@@ -60,7 +60,9 @@ export default async function AdminPage() {
                   </span>
                 </p>
               </div>
-              <AdminListingActions listingId={listing.id} status={listing.status} />
+              <div className="flex justify-end sm:shrink-0">
+                <AdminListingActions listingId={listing.id} status={listing.status} />
+              </div>
             </div>
           ))}
         </div>

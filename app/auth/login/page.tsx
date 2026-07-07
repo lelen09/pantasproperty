@@ -17,7 +17,16 @@ export default function LoginPage() {
     setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
-      toast.error('Email atau password salah')
+      // FIX: sebelumnya semua error ditampilkan sebagai "Email atau password
+      // salah" walau penyebabnya beda (misal email belum dikonfirmasi),
+      // jadi user tidak pernah tahu penyebab sebenarnya.
+      if (error.message.toLowerCase().includes('email not confirmed')) {
+        toast.error('Email belum dikonfirmasi. Cek inbox/spam untuk link verifikasi.')
+      } else if (error.message.toLowerCase().includes('invalid login credentials')) {
+        toast.error('Email atau password salah')
+      } else {
+        toast.error(error.message)
+      }
     } else {
       router.push('/dashboard')
       router.refresh()
@@ -58,6 +67,11 @@ export default function LoginPage() {
           Belum punya akun?{' '}
           <a href="/auth/register" className="text-navy-600 font-medium">
             Daftar sebagai Agent
+          </a>
+        </p>
+        <p className="text-center text-sm text-gray-500 mt-2">
+          <a href="/auth/forgot-password" className="text-navy-600 font-medium">
+            Lupa password?
           </a>
         </p>
       </div>

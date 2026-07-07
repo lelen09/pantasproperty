@@ -46,34 +46,36 @@ export default async function DashboardPage() {
             return (
               <div
                 key={listing.id}
-                className="flex items-center gap-4 bg-white rounded-2xl border border-gray-100 p-4 shadow-sm"
+                className="flex flex-col gap-3 bg-white rounded-2xl border border-gray-100 p-4 shadow-sm sm:flex-row sm:items-center sm:gap-4"
               >
-                <div className="w-20 h-20 rounded-xl bg-gray-100 overflow-hidden shrink-0">
-                  {cover && (
-                    <img src={cover.url} alt="" className="w-full h-full object-cover" />
-                  )}
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="w-20 h-20 rounded-xl bg-gray-100 overflow-hidden shrink-0">
+                    {cover && (
+                      <img src={cover.url} alt="" className="w-full h-full object-cover" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-800 truncate">{listing.title}</p>
+                    <p className="text-gold-600 font-bold text-sm">
+                      {formatRupiah(listing.price)}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {listing.city} ·{' '}
+                      <span
+                        className={
+                          listing.status === 'active'
+                            ? 'text-navy-600'
+                            : listing.status === 'sold'
+                            ? 'text-red-500'
+                            : 'text-gray-400'
+                        }
+                      >
+                        {listing.status}
+                      </span>
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-800 truncate">{listing.title}</p>
-                  <p className="text-gold-600 font-bold text-sm">
-                    {formatRupiah(listing.price)}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    {listing.city} ·{' '}
-                    <span
-                      className={
-                        listing.status === 'active'
-                          ? 'text-navy-600'
-                          : listing.status === 'sold'
-                          ? 'text-red-500'
-                          : 'text-gray-400'
-                      }
-                    >
-                      {listing.status}
-                    </span>
-                  </p>
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-1 justify-end sm:shrink-0">
                   <Link
                     href={`/dashboard/listing/${listing.id}/edit`}
                     className="p-2 text-gray-500 hover:text-navy-600 hover:bg-navy-50 rounded-lg transition"

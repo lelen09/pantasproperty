@@ -175,10 +175,14 @@ CREATE POLICY "User bisa hapus avatar sendiri" ON storage.objects
 -- =============================================
 -- TRIGGER: Auto-create profile saat user register
 -- =============================================
+-- FIX: tabel ditulis lengkap "public.profiles" dan search_path di-set eksplisit.
+-- Tanpa ini, trigger auth internal Supabase bisa gagal dengan error
+-- 'relation "profiles" does not exist' karena search_path bawaan konteks
+-- trigger tidak selalu menyertakan schema "public".
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO profiles (id, full_name, phone_whatsapp, role)
+  INSERT INTO public.profiles (id, full_name, phone_whatsapp, role)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'full_name', 'Agent Baru'),
@@ -187,7 +191,7 @@ BEGIN
   );
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
