@@ -3,6 +3,7 @@
 // Card rumah untuk halaman publik — dengan tombol WhatsApp agent
 
 import { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
 import { createPortal } from 'react-dom'
 import { MapPin, BedDouble, Bath, Layers, Car, MessageCircle, Play, User, X, Heart, Share2, FileCheck, Compass, ShieldCheck, Route, TrafficCone, School, Store, ChevronLeft, ChevronRight } from 'lucide-react'
 import type { Listing } from '@/lib/types'
@@ -43,7 +44,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
   }
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/#listing-${listing.id}`
+    const url = `${window.location.origin}/listing/${listing.id}`
     const shareData = {
       title: listing.title,
       text: `Lihat properti "${listing.title}" - ${formatRupiahShort(listing.price)}`,
@@ -233,50 +234,52 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 
       {/* ── KONTEN */}
       <div className="p-4">
-        {/* Harga */}
-        <div className="text-gold-600 font-bold text-xl mb-0.5">
-          {formatRupiah(listing.price)}
-        </div>
-        <p className="text-xs text-gray-400 mb-2">
-          Bisa KPR mulai ~{formatRupiahShort(estimateKprMonthly(listing.price))}/bulan*
-        </p>
+        <Link href={`/listing/${listing.id}`} className="block">
+          {/* Harga */}
+          <div className="text-gold-600 font-bold text-xl mb-0.5">
+            {formatRupiah(listing.price)}
+          </div>
+          <p className="text-xs text-gray-400 mb-2">
+            Bisa KPR mulai ~{formatRupiahShort(estimateKprMonthly(listing.price))}/bulan*
+          </p>
 
-        {/* Judul */}
-        <span className="inline-block bg-navy-50 text-navy-700 text-xs font-medium px-2 py-0.5 rounded-full mb-1.5">
-          {listing.property_type}
-        </span>
-        <h3 className="font-semibold text-gray-800 text-base leading-snug mb-2 line-clamp-2">
-          {listing.title}
-        </h3>
+          {/* Judul */}
+          <span className="inline-block bg-navy-50 text-navy-700 text-xs font-medium px-2 py-0.5 rounded-full mb-1.5">
+            {listing.property_type}
+          </span>
+          <h3 className="font-semibold text-gray-800 text-base leading-snug mb-2 line-clamp-2">
+            {listing.title}
+          </h3>
 
-        {/* Lokasi */}
-        <p className="text-gray-500 text-sm flex items-center gap-1 mb-3">
-          <MapPin size={13} className="shrink-0" />
-          {listing.city}, {listing.province}
-        </p>
+          {/* Lokasi */}
+          <p className="text-gray-500 text-sm flex items-center gap-1 mb-3">
+            <MapPin size={13} className="shrink-0" />
+            {listing.city}, {listing.province}
+          </p>
 
-        {/* Spesifikasi */}
-        <div className="flex flex-wrap gap-3 text-sm text-gray-600 mb-4">
-          <span className="flex items-center gap-1">
-            <BedDouble size={14} className="text-gray-400" /> {listing.bedrooms} KT
-          </span>
-          <span className="flex items-center gap-1">
-            <Bath size={14} className="text-gray-400" /> {listing.bathrooms} KM
-          </span>
-          <span className="flex items-center gap-1">
-            <Layers size={14} className="text-gray-400" /> {listing.floors} Lt
-          </span>
-          {listing.garage > 0 && (
+          {/* Spesifikasi */}
+          <div className="flex flex-wrap gap-3 text-sm text-gray-600 mb-4">
             <span className="flex items-center gap-1">
-              <Car size={14} className="text-gray-400" /> {listing.garage} Garasi
+              <BedDouble size={14} className="text-gray-400" /> {listing.bedrooms} KT
             </span>
-          )}
-        </div>
+            <span className="flex items-center gap-1">
+              <Bath size={14} className="text-gray-400" /> {listing.bathrooms} KM
+            </span>
+            <span className="flex items-center gap-1">
+              <Layers size={14} className="text-gray-400" /> {listing.floors} Lt
+            </span>
+            {listing.garage > 0 && (
+              <span className="flex items-center gap-1">
+                <Car size={14} className="text-gray-400" /> {listing.garage} Garasi
+              </span>
+            )}
+          </div>
 
-        <div className="flex gap-2 text-xs text-gray-500 mb-3 flex-wrap">
-          <span className="bg-gray-100 px-2 py-1 rounded-lg">LT: {listing.land_area} m²</span>
-          <span className="bg-gray-100 px-2 py-1 rounded-lg">LB: {listing.building_area} m²</span>
-        </div>
+          <div className="flex gap-2 text-xs text-gray-500 mb-3 flex-wrap">
+            <span className="bg-gray-100 px-2 py-1 rounded-lg">LT: {listing.land_area} m²</span>
+            <span className="bg-gray-100 px-2 py-1 rounded-lg">LB: {listing.building_area} m²</span>
+          </div>
+        </Link>
 
         {/* Info tambahan */}
         {(listing.certificate_type || listing.orientation || listing.is_flood_free || listing.road_access) && (
