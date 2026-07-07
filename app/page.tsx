@@ -1,5 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import ListingCard from '@/components/ListingCard'
+import PropertyBrowser from '@/components/PropertyBrowser'
 import Navbar from '@/components/Navbar'
 import Link from 'next/link'
 import type { Listing } from '@/lib/types'
@@ -55,21 +55,13 @@ export default async function HomePage() {
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
             🏠 Properti Pilihan
           </h1>
-          <p className="text-gray-500 mb-8">
-            {listings?.length || 0} rumah tersedia
-          </p>
 
-          {listings && listings.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(listings as Listing[]).map((listing) => (
-                <ListingCard key={listing.id} listing={listing} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-20 text-gray-400">
-              Belum ada listing yang tersedia.
-            </div>
-          )}
+          <PropertyBrowser listings={(listings as Listing[]) || []} />
+
+          <p className="text-xs text-gray-400 mt-8">
+            *Estimasi cicilan KPR bersifat kasar, bukan simulasi resmi bank. Hubungi bank untuk
+            perhitungan akurat.
+          </p>
         </div>
       </main>
     </>

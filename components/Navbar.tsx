@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { LogOut, LayoutDashboard, Users, UserCircle } from 'lucide-react'
+import { LogOut, LayoutDashboard, Users, UserCircle, Heart } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 
@@ -32,6 +32,12 @@ export default function Navbar({
         </Link>
 
         <div className="flex items-center gap-2">
+          <Link
+            href="/favorit"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 hover:text-red-500 rounded-xl transition"
+          >
+            <Heart size={16} /> <span className="hidden sm:inline">Favorit</span>
+          </Link>
           {isLoggedIn ? (
             <>
               {isAdmin ? (

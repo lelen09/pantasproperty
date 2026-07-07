@@ -2,9 +2,12 @@
 // components/ListingCard.tsx
 // Card rumah untuk halaman publik — dengan tombol WhatsApp agent
 
-import { useState } from 'react'
-import { MapPin, BedDouble, Bath, Layers, Car, MessageCircle, Play, User, X } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { MapPin, BedDouble, Bath, Layers, Car, MessageCircle, Play, User, X, Heart, Share2 } from 'lucide-react'
 import type { Listing } from '@/lib/types'
+import { isFavoriteListing, toggleFavoriteListing } from '@/lib/favorites'
+import { estimateKprMonthly, formatRupiahShort } from '@/lib/kpr'
+import toast from 'react-hot-toast'
 
 function formatRupiah(angka: number) {
   if (angka >= 1_000_000_000) return `Rp ${(angka / 1_000_000_000).toFixed(1)} M`
@@ -15,6 +18,36 @@ function formatRupiah(angka: number) {
 export default function ListingCard({ listing }: { listing: Listing }) {
   const [showVideo, setShowVideo] = useState(false)
   const [showAgentModal, setShowAgentModal] = useState(false)
+  const [isFav, setIsFav] = useState(false)
+
+  useEffect(() => {
+    setIsFav(isFavoriteListing(listing.id))
+  }, [listing.id])
+
+  const handleToggleFavorite = () => {
+    const added = toggleFavoriteListing(listing.id)
+    setIsFav(added)
+    toast.success(added ? 'Ditambahkan ke Favorit' : 'Dihapus dari Favorit')
+  }
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/#listing-${listing.id}`
+    const shareData = {
+      title: listing.title,
+      text: `Lihat properti "${listing.title}" - ${formatRupiahShort(listing.price)}`,
+      url,
+    }
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData)
+      } catch {
+        // user membatalkan share, tidak perlu ditangani
+      }
+    } else {
+      await navigator.clipboard.writeText(url)
+      toast.success('Link disalin ke clipboard')
+    }
+  }
 
   const coverPhoto = listing.listing_media?.find(m => m.is_cover && m.type === 'photo')
   const video = listing.listing_media?.find(m => m.type === 'video')
@@ -29,10 +62,29 @@ export default function ListingCard({ listing }: { listing: Listing }) {
   const waLink = `https://wa.me/${waNumber}?text=${waMessage}`
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+    <div id={`listing-${listing.id}`} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow scroll-mt-20">
 
       {/* ── FOTO / VIDEO */}
       <div className="relative aspect-[4/3] bg-gray-100">
+        {/* Favorit & Share */}
+        <div className="absolute top-2 right-2 z-10 flex gap-1.5">
+          <button
+            type="button"
+            onClick={handleToggleFavorite}
+            className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-sm hover:bg-white transition"
+            title="Favorit"
+          >
+            <Heart size={15} className={isFav ? 'fill-red-500 text-red-500' : 'text-gray-500'} />
+          </button>
+          <button
+            type="button"
+            onClick={handleShare}
+            className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-sm hover:bg-white transition"
+            title="Bagikan"
+          >
+            <Share2 size={14} className="text-gray-500" />
+          </button>
+        </div>
         {showVideo && video ? (
           <video
             src={video.url}
@@ -82,9 +134,12 @@ export default function ListingCard({ listing }: { listing: Listing }) {
       {/* ── KONTEN */}
       <div className="p-4">
         {/* Harga */}
-        <div className="text-gold-600 font-bold text-xl mb-1">
+        <div className="text-gold-600 font-bold text-xl mb-0.5">
           {formatRupiah(listing.price)}
         </div>
+        <p className="text-xs text-gray-400 mb-2">
+          Bisa KPR mulai ~{formatRupiahShort(estimateKprMonthly(listing.price))}/bulan*
+        </p>
 
         {/* Judul */}
         <h3 className="font-semibold text-gray-800 text-base leading-snug mb-2 line-clamp-2">

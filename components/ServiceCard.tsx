@@ -2,9 +2,11 @@
 // components/ServiceCard.tsx
 // Card jasa renovasi untuk halaman publik — dengan tombol WhatsApp agent
 
-import { useState } from 'react'
-import { MapPin, MessageCircle, User, X, Hammer, ImageOff } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { MapPin, MessageCircle, User, X, Hammer, ImageOff, Heart, Share2 } from 'lucide-react'
 import type { Service } from '@/lib/types'
+import { isFavoriteService, toggleFavoriteService } from '@/lib/favorites'
+import toast from 'react-hot-toast'
 
 function formatRupiah(angka: number) {
   if (angka >= 1_000_000_000) return `Rp ${(angka / 1_000_000_000).toFixed(1)} M`
@@ -14,6 +16,36 @@ function formatRupiah(angka: number) {
 
 export default function ServiceCard({ service }: { service: Service }) {
   const [showAgentModal, setShowAgentModal] = useState(false)
+  const [isFav, setIsFav] = useState(false)
+
+  useEffect(() => {
+    setIsFav(isFavoriteService(service.id))
+  }, [service.id])
+
+  const handleToggleFavorite = () => {
+    const added = toggleFavoriteService(service.id)
+    setIsFav(added)
+    toast.success(added ? 'Ditambahkan ke Favorit' : 'Dihapus dari Favorit')
+  }
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/renovasi#service-${service.id}`
+    const shareData = {
+      title: service.title,
+      text: `Lihat jasa "${service.title}"`,
+      url,
+    }
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData)
+      } catch {
+        // dibatalkan user
+      }
+    } else {
+      await navigator.clipboard.writeText(url)
+      toast.success('Link disalin ke clipboard')
+    }
+  }
 
   const before = service.service_media?.find((m) => m.type === 'before')
   const after = service.service_media?.find((m) => m.type === 'after')
@@ -28,7 +60,27 @@ export default function ServiceCard({ service }: { service: Service }) {
   const waLink = `https://wa.me/${waNumber}?text=${waMessage}`
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+    <div id={`service-${service.id}`} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow scroll-mt-20 relative">
+      {/* Favorit & Share */}
+      <div className="absolute top-2 right-2 z-10 flex gap-1.5">
+        <button
+          type="button"
+          onClick={handleToggleFavorite}
+          className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-sm hover:bg-white transition"
+          title="Favorit"
+        >
+          <Heart size={15} className={isFav ? 'fill-red-500 text-red-500' : 'text-gray-500'} />
+        </button>
+        <button
+          type="button"
+          onClick={handleShare}
+          className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-sm hover:bg-white transition"
+          title="Bagikan"
+        >
+          <Share2 size={14} className="text-gray-500" />
+        </button>
+      </div>
+
       {/* ── FOTO */}
       {before && after ? (
         <div className="grid grid-cols-2 gap-0.5 bg-gray-100">
